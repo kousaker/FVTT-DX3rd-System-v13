@@ -1,45 +1,30 @@
-export class WeaponDialog extends Dialog {
+export class WeaponDialog extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
 
-  constructor(actor, callback, options) {
+  constructor(actor, callback, options = {}) {
     super(options);
 
     this.actor = actor;
     this.callback = callback;
-
-    this.data = {
-      title: game.i18n.localize("DX3rd.WeaponSelect"),
-      content: "",
-      buttons: {
-        create: {
-          label: "Apply",
-          callback: () => this._onSubmit()
-
-        }
-      },
-      default: 'create'
-    };
-
   }
 
   /** @override */
-  static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
-      template: "systems/dx3rd/templates/dialog/weapon-dialog.html",
-      classes: ["dx3rd", "dialog"],
-      width: 600
-    });
-  }
+  static DEFAULT_OPTIONS = {
+    tag: "form",
+    classes: ["dx3rd", "dialog"],
+    position: { width: 600 },
+    window: { title: "DX3rd.WeaponSelect", resizable: true },
+    actions: {
+      submit: this.#onSubmit
+    }
+  };
 
   /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
-
-    html.find('.item-label').click(this._onShowItemDetails.bind(this));
-    html.find(".echo-item").click(this._echoItemDescription.bind(this));
-  }
+  static PARTS = {
+    form: { template: "systems/dx3rd/templates/dialog/weapon-dialog.html" }
+  };
 
   /** @override */
-  getData() {
+  async _prepareContext(options) {
     let vehicleList = [];
     let weaponList = [];
 
@@ -51,14 +36,26 @@ export class WeaponDialog extends Dialog {
     }
 
     return {
-      title: this.data.title,
-      content: this.data.content,
-      buttons: this.data.buttons,
-      
+      title: this.title,
+
       actor: this.actor,
       vehicleList: vehicleList,
       weaponList: weaponList
     }
+  }
+
+  /** @override */
+  _onRender(context, options) {
+    for (const el of this.element.querySelectorAll('.item-label'))
+      el.addEventListener('click', this._onShowItemDetails.bind(this));
+
+    for (const el of this.element.querySelectorAll('.echo-item'))
+      el.addEventListener('click', this._echoItemDescription.bind(this));
+  }
+
+  static async #onSubmit(event, target) {
+    event.preventDefault();
+    await this._onSubmit();
   }
 
   async _onSubmit() {
@@ -67,37 +64,39 @@ export class WeaponDialog extends Dialog {
 
     let list = [];
 
-    await $(".check-equipment").each((i, val) => {
-      if ($(val).is(":checked")) {
-        list.push( '<h4>' + val.dataset.name + ` (${val.dataset.attack} / ${val.dataset.guard})</h4>`);
+    for (const el of this.element.querySelectorAll(".check-equipment")) {
+      if (el.checked) {
+        list.push('<h4>' + el.dataset.name + ` (${el.dataset.attack} / ${el.dataset.guard})</h4>`);
 
-        attack += Number(val.dataset.attack);
-        guard += Number(val.dataset.guard);
+        attack += Number(el.dataset.attack);
+        guard += Number(el.dataset.guard);
       }
-    });
+    }
 
     ChatMessage.create({
-      "content": `<h2><b>${game.i18n.localize("DX3rd.WeaponSelect")} (${attack} / ${guard})</b></h2>${list.join("")}`, 
+      "content": `<h2><b>${game.i18n.localize("DX3rd.WeaponSelect")} (${attack} / ${guard})</b></h2>${list.join("")}`,
       "speaker": ChatMessage.getSpeaker({actor: this.actor})
     });
 
     this.callback({ attack, guard });
+
+    await this.close();
   }
 
 
   /* -------------------------------------------- */
 
   _onShowItemDetails(event) {
-    if ($(event.target).prop("tagName") == "INPUT" || $(event.target).prop("tagName") == "IMG")
+    if (event.target.tagName == "INPUT" || event.target.tagName == "IMG")
       return;
 
     event.preventDefault();
-    const toggler = $(event.currentTarget);
-    const item = toggler.parents('.item');
-    const description = item.find('.item-description');
+    const toggler = event.currentTarget;
+    const item = toggler.closest('.item');
+    const description = item.querySelector('.item-description');
 
-    toggler.toggleClass('open');
-    description.slideToggle();
+    toggler.classList.toggle('open');
+    description.style.display = (description.style.display === 'block') ? 'none' : 'block';
   }
 
   /* -------------------------------------------- */
