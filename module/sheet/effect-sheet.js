@@ -14,7 +14,10 @@ export class DX3rdEffectSheet extends DX3rdAttributesSheet {
     const formAttrs = submitData.system?.effect?.attributes ?? {};
 
     const attributes = Object.values(formAttrs).reduce((obj, v) => {
-      let k = v["key"].trim();
+      // FormDataExtended は同名フィールドが複数あると配列を返す。
+      // 想定外の型でも落ちないよう文字列へ正規化する。
+      const rawKey = Array.isArray(v["key"]) ? v["key"][0] : v["key"];
+      let k = String(rawKey ?? "").trim();
       if ( /[\s\.]/.test(k) )  return ui.notifications.error(game.i18n.localize("DX3rd.Notify.InvalidAttributeKey"));
       delete v["key"];
 

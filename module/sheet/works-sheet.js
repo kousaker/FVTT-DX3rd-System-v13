@@ -33,15 +33,37 @@ export class DX3rdWorksSheet extends DX3rdItemSheet {
   /* -------------------------------------------- */
 
   async _onSkillCreate(event) {
-    let key = this.item.system.skillTmp;
+    const key = this.item.system.skillTmp;
+    if (!key || key === "-") return;
+    if (this.form.querySelector(`[name='system.skills.${key}.key']`)) return;
 
-    let newKey = document.createElement("div");
-    const skill = `<input type="hidden" name="system.skills.${key}.key" value="${key}"/>`;
-    newKey.innerHTML = skill;
+    // key だけを送ると、updateSkills が key を削除した結果 {} が保存され、
+    // 名前も能力値も持たない空の行ができてしまう。既定値一式を一緒に送る。
+    const base = this.actor?.system.attributes.skills?.[key]?.base
+      ?? game.DX3rd.baseSkills?.[key]?.base ?? "-";
+    const name = this.actor?.system.attributes.skills?.[key]?.name
+      ?? game.DX3rd.baseSkills?.[key]?.name ?? "";
 
-    newKey = newKey.children[0];
-    this.form.appendChild(newKey);
-    await this.submit();
+    const fields = [
+      [`system.skills.${key}.key`, key],
+      [`system.skills.${key}.name`, name],
+      [`system.skills.${key}.base`, base]
+    ];
+
+    const injected = fields.map(([n, v]) => {
+      const el = document.createElement("input");
+      el.type = "hidden"; el.name = n; el.value = v;
+      this.form.appendChild(el);
+      return el;
+    });
+
+    try {
+      await this.submit();
+    } finally {
+      // 再描画で置換されるのは .window-content の内側だけなので、
+      // ルート<form>直下に足したこれらは明示的に取り除く。
+      injected.forEach(el => el.remove());
+    }
   }
 
 
@@ -57,7 +79,9 @@ export class DX3rdWorksSheet extends DX3rdItemSheet {
 
     // Add new attribute
     if ( action === "create" ) {
-      if (form.querySelector("input[name='system.skills.-.key']"))
+      // 要素種別を問わず既存の「-」行を検出する(input限定だと、再描画後に
+      // selectとして現れる行を見落とし二重登録になる)。
+      if (form.querySelector("[name='system.skills.-.key']"))
         return;
 
       let newKey = document.createElement("div");
@@ -66,7 +90,11 @@ export class DX3rdWorksSheet extends DX3rdItemSheet {
 
       newKey = newKey.children[0];
       form.appendChild(newKey);
-      await this.submit();
+      try {
+        await this.submit();
+      } finally {
+        newKey.remove();
+      }
     }
 
     // Remove existing attribute
@@ -89,7 +117,10 @@ export class DX3rdWorksSheet extends DX3rdItemSheet {
     const formAttrs = submitData.system?.skills ?? {};
 
     const attributes = Object.values(formAttrs).reduce((obj, v) => {
-      let k = v["key"].trim();
+      // FormDataExtended は同名フィールドが複数あると配列を返す。
+      // 想定外の型でも落ちないよう文字列へ正規化する。
+      const rawKey = Array.isArray(v["key"]) ? v["key"][0] : v["key"];
+      let k = String(rawKey ?? "").trim();
       if ( /[\s\.]/.test(k) ) {
         ui.notifications.error(game.i18n.localize("DX3rd.Notify.InvalidAttributeKey"));
         return obj;

@@ -44,7 +44,12 @@ export class DX3rdAttributesSheet extends DX3rdWorksSheet {
       if (pos != "main")
         attr = 'system.effect.attributes';
 
-      if (form.querySelector(`select[name='${attr}.-.key']`))
+      // 既存の「-」行があれば何もしない。
+      // 旧コードは select[name=...] だけを見ていたが、ここで注入するのは
+      // input[type=hidden] なので、テンプレート再描画後にselectとして現れる行と
+      // 二重になり、FormDataExtended が key を配列 ["-","-"] として拾って
+      // updateAttributes の v.key.trim() が落ちていた。要素種別を問わず見る。
+      if (form.querySelector(`[name='${attr}.-.key']`))
         return;
 
       let newKey = document.createElement("div");
@@ -52,8 +57,15 @@ export class DX3rdAttributesSheet extends DX3rdWorksSheet {
       newKey.innerHTML = skill;
 
       newKey = newKey.children[0];
+      // ApplicationV2 では this.form はルート<form>で、再描画で置換されるのは
+      // 内側の .window-content のみ。ここに足した要素は再描画後も生き残るため、
+      // 送信後に必ず取り除く。
       form.appendChild(newKey);
-      await this.submit();
+      try {
+        await this.submit();
+      } finally {
+        newKey.remove();
+      }
     }
 
     // Remove existing attribute
@@ -76,7 +88,10 @@ export class DX3rdAttributesSheet extends DX3rdWorksSheet {
     const formAttrs = submitData.system?.attributes ?? {};
 
     const attributes = Object.values(formAttrs).reduce((obj, v) => {
-      let k = v["key"].trim();
+      // FormDataExtended は同名フィールドが複数あると配列を返す。
+      // 想定外の型でも落ちないよう文字列へ正規化する。
+      const rawKey = Array.isArray(v["key"]) ? v["key"][0] : v["key"];
+      let k = String(rawKey ?? "").trim();
       if ( /[\s\.]/.test(k) )  return ui.notifications.error(game.i18n.localize("DX3rd.Notify.InvalidAttributeKey"));
       delete v["key"];
 

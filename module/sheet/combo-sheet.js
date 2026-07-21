@@ -72,8 +72,14 @@ export class DX3rdComboSheet extends DX3rdAttributesSheet {
     newKey.innerHTML = effect;
 
     newKey = newKey.children[0];
+    // 再描画で置換されるのは .window-content の内側だけなので、ルート<form>直下へ
+    // 足したこの要素は送信後に必ず取り除く(残ると次回送信で値が二重になる)。
     this.form.appendChild(newKey);
-    await this.submit();
+    try {
+      await this.submit();
+    } finally {
+      newKey.remove();
+    }
   }
 
   /* -------------------------------------------- */
@@ -88,8 +94,14 @@ export class DX3rdComboSheet extends DX3rdAttributesSheet {
     newKey.innerHTML = weapon;
 
     newKey = newKey.children[0];
+    // 再描画で置換されるのは .window-content の内側だけなので、ルート<form>直下へ
+    // 足したこの要素は送信後に必ず取り除く(残ると次回送信で値が二重になる)。
     this.form.appendChild(newKey);
-    await this.submit();
+    try {
+      await this.submit();
+    } finally {
+      newKey.remove();
+    }
   }
 
   /* -------------------------------------------- */
