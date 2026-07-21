@@ -1320,7 +1320,7 @@ Hooks.on("enterScene", (actor) => {
 
 Hooks.on("createActiveEffect", async (effect, options, userId) => {
   let actor = effect.parent;  // 상태이상이 적용된 액터
-  let condition = effect.data.flags?.dx3rd?.statusId;
+  let condition = effect.flags?.dx3rd?.statusId;
 
   // 상태이상의 label이 "DX3rd.Berserk"인 경우에만 처리
   if (condition === "berserk") {
@@ -1346,8 +1346,8 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
       let optionElements = options.map(option => `<option value="${option.value}">${option.label}</option>`).join("");
 
       // 다이얼로그 생성 (드롭다운을 통해 타입 선택)
-      new Dialog({
-        title: game.i18n.localize("DX3rd.Berserk"),
+      new foundry.applications.api.DialogV2({
+        window: { title: game.i18n.localize("DX3rd.Berserk") },
         content: `
             <style>
               #berserk-type {
@@ -1359,12 +1359,14 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
               ${optionElements}  <!-- 자바스크립트로 생성된 옵션들 삽입 -->
             </select>
             <hr>`,
-        buttons: {
-          ok: {
+        buttons: [
+          {
+            action: "ok",
             label: "OK",
-            callback: async (html) => {
+            default: true,
+            callback: async (event, button, dialog) => {
               // 선택된 타입 가져오기
-              const selectedType = html.find("#berserk-type").val();
+              const selectedType = dialog.element.querySelector("#berserk-type").value;
               // 선택된 타입을 actor의 conditions에 업데이트
               if (selectedType === "selfmutilation") {
                 const currentHP = actor.system.attributes.hp.value;
@@ -1373,7 +1375,7 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
                 let lostHP = currentHP - afterHP;
 
                 await actor.update({ "system.attributes.hp.value": afterHP })
-                const effect = actor.effects.find(e => e.data.flags?.dx3rd?.statusId === "berserk");
+                const effect = actor.effects.find(e => e.flags?.dx3rd?.statusId === "berserk");
 
                 if (effect) {
                   // 'berserk' 상태가 이미 있을 경우 제거
@@ -1390,11 +1392,11 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
                 ChatMessage.create({
                   speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
                   content: content,
-                  type: CONST.CHAT_MESSAGE_TYPES.IC,
+                  style: CONST.CHAT_MESSAGE_STYLES.IC,
                 });
 
-              } 
-              
+              }
+
               else if (selectedType === "fear") {
                 await actor.update({
                   "system.conditions.berserk.type": selectedType,  // 선택한 타입 저장
@@ -1410,19 +1412,14 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
                 ChatMessage.create({
                   speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
                   content: content,
-                  type: CONST.CHAT_MESSAGE_TYPES.IC,
+                  style: CONST.CHAT_MESSAGE_STYLES.IC,
                 });
 
-                const token = actor.getActiveTokens()[0] || null;
-
-                const riger = CONFIG.statusEffects.find(e => e.id === "riger");
-                if (riger) {
-                  await token.toggleEffect(riger);
-                }
+                await actor.toggleStatusEffect("riger", { active: true });
 
                 console.log(`Applied berserk to token: ${actor.name}`);
-              } 
-              
+              }
+
               else if (selectedType === "normal") {
                 await actor.update({
                   "system.conditions.berserk.type": selectedType,  // 선택한 타입 저장
@@ -1438,9 +1435,9 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
                 ChatMessage.create({
                   speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
                   content: content,
-                  type: CONST.CHAT_MESSAGE_TYPES.IC,
+                  style: CONST.CHAT_MESSAGE_STYLES.IC,
                 });
-              }              
+              }
               else {
                 let label = `${game.i18n.localize(`DX3rd.Urge${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}`)}`;
                 await actor.update({
@@ -1457,19 +1454,20 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
                 ChatMessage.create({
                   speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
                   content: content,
-                  type: CONST.CHAT_MESSAGE_TYPES.IC,
+                  style: CONST.CHAT_MESSAGE_STYLES.IC,
                 });
               }
             }
           },
-          cancel: {
+          {
+            action: "cancel",
             label: "Cancel",
             callback: async () => {
               await effect.delete();  // 상태이상 적용 취소
             }
           }
-        }
-      }).render(true);
+        ]
+      }).render({ force: true });
     }
   }
 
@@ -1478,14 +1476,16 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
     // 상태이상을 생성한 유저에 해당하는지 확인
     if (actor && game.user.id === userId) {
       // 다이얼로그 생성 (userId에 대응하는 사용자에게만 띄움)
-      new Dialog({
-        title: game.i18n.localize("DX3rd.Tainted"),
+      new foundry.applications.api.DialogV2({
+        window: { title: game.i18n.localize("DX3rd.Tainted") },
         content: `<p>Input the rank:</p><input type="text" id="tainted-value" />`,
-        buttons: {
-          ok: {
+        buttons: [
+          {
+            action: "ok",
             label: "OK",
-            callback: async (html) => {
-              const inputValue = html.find("#tainted-value").val();  // 입력된 값 가져오기
+            default: true,
+            callback: async (event, button, dialog) => {
+              const inputValue = dialog.element.querySelector("#tainted-value").value;  // 입력된 값 가져오기
               await actor.update({
                 "system.conditions.tainted.value": inputValue,  // 입력값 저장
                 "system.conditions.tainted.active": true        // 상태 활성화
@@ -1500,18 +1500,19 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
                 ChatMessage.create({
                   speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
                   content: content,
-                  type: CONST.CHAT_MESSAGE_TYPES.IC,
+                  style: CONST.CHAT_MESSAGE_STYLES.IC,
                 });
             }
           },
-          cancel: {
+          {
+            action: "cancel",
             label: "Cancel",
             callback: async () => {
               await effect.delete();  // 상태이상 적용 취소
             }
           }
-        }
-      }).render(true);
+        ]
+      }).render({ force: true });
     }
   }
 
@@ -1524,8 +1525,8 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
       let tokenOptions = otherTokens.map(token => `<option value="${token.actor.name}">${token.actor.name}</option>`).join("");
 
       // 다이얼로그 생성 (드롭다운을 통해 토큰 선택)
-      new Dialog({
-        title: game.i18n.localize("DX3rd.Hatred"),
+      new foundry.applications.api.DialogV2({
+        window: { title: game.i18n.localize("DX3rd.Hatred") },
         content: `
         <style>
           #hatred-target {
@@ -1535,12 +1536,14 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
         <p>Select the target:</p>
         <select id="hatred-target">${tokenOptions}</select>
         <hr>`,
-        buttons: {
-          ok: {
+        buttons: [
+          {
+            action: "ok",
             label: "OK",
-            callback: async (html) => {
+            default: true,
+            callback: async (event, button, dialog) => {
               // 선택된 토큰 이름 가져오기
-              const selectedTokenName = html.find("#hatred-target").val();
+              const selectedTokenName = dialog.element.querySelector("#hatred-target").value;
               // 선택된 토큰의 이름을 actor의 conditions에 업데이트
               await actor.update({
                 "system.conditions.hatred.target": selectedTokenName,  // 선택한 토큰 이름 저장
@@ -1555,18 +1558,19 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
               ChatMessage.create({
                 speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
                 content: content,
-                type: CONST.CHAT_MESSAGE_TYPES.IC,
+                style: CONST.CHAT_MESSAGE_STYLES.IC,
               });
             }
           },
-          cancel: {
+          {
+            action: "cancel",
             label: "Cancel",
             callback: async () => {
               await effect.delete();  // 상태이상 적용 취소
             }
           }
-        }
-      }).render(true);
+        ]
+      }).render({ force: true });
     }
   }
 
@@ -1579,8 +1583,8 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
       let tokenOptions = otherTokens.map(token => `<option value="${token.actor.name}">${token.actor.name}</option>`).join("");
 
       // 다이얼로그 생성 (드롭다운을 통해 토큰 선택)
-      new Dialog({
-        title: game.i18n.localize("DX3rd.Fear"),
+      new foundry.applications.api.DialogV2({
+        window: { title: game.i18n.localize("DX3rd.Fear") },
         content: `
         <style>
           #fear-target {
@@ -1590,12 +1594,14 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
         <p>Select the target:</p>
         <select id="fear-target">${tokenOptions}</select>
         <hr>`,
-        buttons: {
-          ok: {
+        buttons: [
+          {
+            action: "ok",
             label: "OK",
-            callback: async (html) => {
+            default: true,
+            callback: async (event, button, dialog) => {
               // 선택된 토큰 이름 가져오기
-              const selectedTokenName = html.find("#fear-target").val();
+              const selectedTokenName = dialog.element.querySelector("#fear-target").value;
               // 선택된 토큰의 이름을 actor의 conditions에 업데이트
               await actor.update({
                 "system.conditions.fear.target": selectedTokenName,  // 선택한 토큰 이름 저장
@@ -1610,18 +1616,19 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
               ChatMessage.create({
                 speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
                 content: content,
-                type: CONST.CHAT_MESSAGE_TYPES.IC,
+                style: CONST.CHAT_MESSAGE_STYLES.IC,
               });
             }
           },
-          cancel: {
+          {
+            action: "cancel",
             label: "Cancel",
             callback: async () => {
               await effect.delete();  // 상태이상 적용 취소
             }
           }
-        }
-      }).render(true);
+        ]
+      }).render({ force: true });
     }
   }
 
@@ -1641,7 +1648,7 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
       content: content,
-      type: CONST.CHAT_MESSAGE_TYPES.IC,
+      style: CONST.CHAT_MESSAGE_STYLES.IC,
     });
   }
 });
