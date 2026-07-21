@@ -357,6 +357,29 @@
   position: relative;
   margin-bottom: 3px;
   flex: 1;
+  min-width: 0;
+}
+
+/* ============================================================================
+   ステータスボックスを絶対配置 → Flex へ
+
+   従来は「黒いラベル(.title 80px固定)」の右に「白い値ボックス(.name /
+   .stat-list)」を position:absolute + 固定px(left:74px / width:259px)で
+   置いていた。絶対配置なので親の幅に一切追従せず、
+     - 経験点・常備化P(.grid-2 = 約152px)に対し中身が約206px あり右へはみ出す
+     - HPの「0 / 29」が右端で欠ける
+     - ラベルが長い言語では黒ラベルから文字がはみ出す
+   という崩れが出ていた。見た目(黒い平行四辺形+白い斜めボックス)は
+   そのままに、Flex で並べてネガティブマージンで従来の食い込み幅を再現する。
+   ============================================================================ */
+.dx3rd .sheet-wrapper .sheet-stat .stat-box:not(.ability) {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.dx3rd .sheet-wrapper .sheet-stat .stat-box:not(.ability) > .title {
+  flex: 0 0 auto;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .grid-2 .stat-box .title {
@@ -364,30 +387,50 @@
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .stat-box .title {
-  width: 80px;
+  /* 固定80pxだと日本語/韓国語/英語でラベル長が変わったとき文字がはみ出す。
+     最低幅は従来どおり80pxを保ちつつ、必要なら伸ばす。 */
+  width: auto;
+  min-width: 80px;
+  box-sizing: border-box;
   height: 32px;
   font-size: 16px;
+  line-height: 20px;
+  white-space: nowrap;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .stat-box .name {
   background: white;
-  width: 259px;
-  position: absolute;
+  color: black;
+  position: static;
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  box-sizing: border-box;
   padding-left: 24px;
-  left: 74px;
+  /* 従来の left:74px(タイトル80px)= 6px の食い込みを再現 */
+  margin-left: -6px;
   height: 32px;
   border-bottom-right-radius: 10px;
   border-top-right-radius: 10px;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .grid-2 .stat-box .stat-list {
-  left: 66px;
+  /* 従来 left:66px。タイトルが left:-14px で左へずれている分だけ詰める。 */
+  left: auto;
+  margin-left: -14px;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .stat-box .stat-list {
-  position: absolute;
-  left: 74px;
-  top: 0;
+  /* ::before(白い斜めボックス)の基準になるため relative は維持する。 */
+  position: relative;
+  left: auto;
+  top: auto;
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 32px;
+  box-sizing: border-box;
+  margin-left: -6px;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .stat-box .stat-list::before {
@@ -402,28 +445,52 @@
 
 .dx3rd .sheet-wrapper .sheet-stat .stat-box .stat-list .stat {
   height: 32px;
-  width: 60px;
-  background: white;
+  /* 幅60px固定だと親が狭いときに数値が欠ける。等分割で追従させる。 */
+  width: auto;
+  min-width: 0;
+  flex: 1 1 0;
+  background: transparent;
+  color: #000;
   text-align: center;
   position: relative;
-  background: transparent;
   z-index: 1;
   border: none;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .stat-grid {
   display: flex;
-  gap: 10px;
+  /* 幅が足りないときは潰れる前に折り返す。 */
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.dx3rd .sheet-wrapper .sheet-stat .stat-grid .stat-box {
+  min-width: 140px;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .stat-grid .no-flex {
-  flex: none;
+  flex: 0 0 140px;
   width: 140px;
 }
 
+/* V1コアは .profile-img に枠と最大幅を与えていた。V2では効かないため、
+   列幅より画像が大きいときにグリッドを押し広げないようにする。 */
+.dx3rd .sheet-wrapper .sheet-stat .grid-img .profile-img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border: none;
+}
+
+/* z-index は position 指定が無いと効かない(従来は白い斜めボックスの
+   下へ潜っていた)。 */
 .dx3rd .sheet-wrapper .sheet-stat .stat-box .stat-list .divider {
-  flex: none;
+  flex: 0 0 auto;
+  position: relative;
   z-index: 1;
+  padding: 0 2px;
+  color: #000;
+  text-align: center;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .dice-info {
