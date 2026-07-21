@@ -1,6 +1,7 @@
-<form class="{{cssClass}}" autocomplete="off">
-
-  <div class="sheet-wrapper">
+{{!-- ApplicationV2(tag: "form")ではアプリ自身のルート要素が<form>になるため、
+     このテンプレートは<form>で囲まない(入れ子<form>を避けるための設計変更)。
+     autocomplete="off"はDX3rdActorSheet#_onRenderで付与している。 --}}
+<div class="sheet-wrapper">
     <button style="display: none;">Input Button Click bypass</button>
     {{!-- Sheet Header --}}
     <header class="sheet-header">
@@ -1233,4 +1234,3 @@
     </section>
 
   </div>
-</form>
