@@ -57,7 +57,7 @@ export class DX3rdCombat extends Combat {
 
       // Produce an initiative roll for the Combatant
       const roll = combatant.getInitiativeRoll(formula);
-      await roll.evaluate({async: true});
+      await roll.evaluate();
 
       let init = roll.total;
       if (combatant.actorId == startActor.id)
@@ -142,14 +142,14 @@ export class DX3rdCombat extends Combat {
       await this.initiative();
     } else {
       // 다이얼로그 생성
-      new Dialog({
-        title: "Turn End",
-        content: `
-        <p>${combatant.name}</p>
-      `,
-        buttons: {
-          endAction: {
+      new foundry.applications.api.DialogV2({
+        window: { title: "Turn End" },
+        content: `<p>${combatant.name}</p>`,
+        buttons: [
+          {
+            action: "endAction",
             label: game.i18n.localize("DX3rd.ActionEnd"),
+            default: true,
             callback: async () => {
               let thisCombatant = combatant;
               let actor = thisCombatant.actor
@@ -171,7 +171,8 @@ export class DX3rdCombat extends Combat {
               await this.initiative();
             },
           },
-          delayAction: {
+          {
+            action: "delayAction",
             label: game.i18n.localize("DX3rd.ActionDelay"),
             callback: async () => {
 
@@ -209,9 +210,8 @@ export class DX3rdCombat extends Combat {
               await this.initiative();
             },
           }
-        },
-        default: "endAction"
-      }).render(true);
+        ]
+      }).render({ force: true });
     }
 
 
@@ -268,7 +268,7 @@ export class DX3rdCombat extends Combat {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ alias: "GM" }),  // 여기서 GM으로 설정
       content: content,
-      type: CONST.CHAT_MESSAGE_TYPES.IC,
+      style: CONST.CHAT_MESSAGE_STYLES.IC,
     });
 
     // 기본 전투 종료 처리 호출
@@ -304,7 +304,7 @@ export class DX3rdCombat extends Combat {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ alias: "GM" }),  // 여기서 GM으로 설정
       content: content,
-      type: CONST.CHAT_MESSAGE_TYPES.IC,
+      style: CONST.CHAT_MESSAGE_STYLES.IC,
     });
 
     await this.setup_trigger();
@@ -337,7 +337,7 @@ export class DX3rdCombat extends Combat {
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ alias: "GM" }),
         content: content,
-        type: CONST.CHAT_MESSAGE_TYPES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
       });
     }
 
@@ -405,7 +405,7 @@ export class DX3rdCombat extends Combat {
               ChatMessage.create({
                 speaker: ChatMessage.getSpeaker({ alias: "GM" }),
                 content: message,
-                type: CONST.CHAT_MESSAGE_TYPES.IC,
+                style: CONST.CHAT_MESSAGE_STYLES.IC,
               });
               break;
             case 2:
@@ -449,7 +449,7 @@ export class DX3rdCombat extends Combat {
               ChatMessage.create({
                 speaker: ChatMessage.getSpeaker({ alias: "GM" }),
                 content: message,
-                type: CONST.CHAT_MESSAGE_TYPES.IC,
+                style: CONST.CHAT_MESSAGE_STYLES.IC,
               });
               this.cleanup_trigger();
               break;
@@ -555,7 +555,7 @@ export class DX3rdCombat extends Combat {
       await ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
         content: messageContent,
-        type: CONST.CHAT_MESSAGE_TYPES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
       });
     }
   }
@@ -600,7 +600,7 @@ export class DX3rdCombat extends Combat {
       ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
         content: messageContent,
-        type: CONST.CHAT_MESSAGE_TYPES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
       });
     }
   }
@@ -646,7 +646,7 @@ export class DX3rdCombat extends Combat {
       ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
         content: messageContent,
-        type: CONST.CHAT_MESSAGE_TYPES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
       });
     }
   }
@@ -655,7 +655,7 @@ export class DX3rdCombat extends Combat {
   async _dazed_off() {
     for (let combatant of this.combatants) {
       let actor = combatant.actor;
-      let condition = actor.effects.find(e => e.data.flags?.dx3rd?.statusId === "dazed");
+      let condition = actor.effects.find(e => e.flags?.dx3rd?.statusId === "dazed");
       if (condition) {
         await condition.delete();
       }
