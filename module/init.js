@@ -246,10 +246,10 @@ Hooks.on("updateActorCost", async (actor, key, usage) => {
       chatData.content = `<div class="context-box">${actor.name}(${itemUsage.type}): ${last} -> ${cost} (${itemUsage.type != "hp" ? '+' : '-'}${itemUsage.cost})</div>`;
     else {
       let roll = new Roll(itemUsage.cost);
-      await roll.roll({ async: true });
-  
+      await roll.evaluate();
+
       let rollData = await roll.render();
-  
+
       cost = (itemUsage.type == "encroachment") ? last + roll.total : last - roll.total;
       chatData.content = `
         <div class="dx3rd-roll" data-actor-id=${actor.id}>
@@ -257,7 +257,7 @@ Hooks.on("updateActorCost", async (actor, key, usage) => {
           ${rollData}
         </div>
       `;
-      chatData.type = CONST.CHAT_MESSAGE_TYPES.ROLL;
+      chatData.rolls = [roll];
       chatData.sound = CONFIG.sounds.dice;
       chatData.roll = roll;
     }
