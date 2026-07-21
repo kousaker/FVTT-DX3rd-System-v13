@@ -2,10 +2,10 @@
   "id": "dx3rd",
   "title": "Double Cross 3rd",
   "description": "Double Cross 3rd",
-  "version": "1.6.2",
+  "version": "2.0.0",
   "compatibility": {
-    "minimum": 11,
-    "verified": "11.315"
+    "minimum": 13,
+    "verified": "13.345"
   },
   "templateVersion": 6,
   "authors": [
@@ -25,7 +25,6 @@
     "label": "Sample Actor [KR]",
     "system": "dx3rd",
     "path": "./packs/sample-kr.db",
-    "entity": "Actor",
     "type": "Actor",
     "private": false
     
