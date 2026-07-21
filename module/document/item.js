@@ -457,7 +457,7 @@ export class DX3rdItem extends Item {
     let attributes = this.system.effect.attributes;
     let level = ("level" in this.system) ? this.system.level.value : 0;
 
-    let copy = duplicate(attributes);
+    let copy = foundry.utils.deepClone(attributes);
     for (const [key, value] of Object.entries(attributes)) {
       if (key == '-' || key == 'critical_min')
         continue;
@@ -626,7 +626,7 @@ export class DX3rdItem extends Item {
           ChatMessage.create(chatData);
 
           let roll = new Roll("1d10");
-          await roll.roll({ async: true });
+          await roll.evaluate();
 
           roll.toMessage();
         }
@@ -713,7 +713,7 @@ export class DX3rdItem extends Item {
             ChatMessage.create(chatData);
 
             let roll = new Roll("1d10");
-            await roll.roll({ async: true });
+            await roll.evaluate();
 
             roll.toMessage();
           }
