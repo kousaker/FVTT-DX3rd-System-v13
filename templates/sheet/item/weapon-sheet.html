@@ -104,7 +104,14 @@
             </div>
           </label>
           {{!-- We're avoiding WYSIWYGs... for now... --}}
-          {{editor enrichedBiography target="system.description" button=true editable=editable }}
+          {{!-- V1の {{editor}} ヘルパーは .editor-edit を出すだけで、起動処理は
+             FormApplication#activateEditor が担っていた。ApplicationV2 には
+             それが無く編集ボタンが無反応になるため、自己完結して動作する
+             v13のカスタム要素 <prose-mirror> へ置き換える。 --}}
+          <prose-mirror name="system.description" value="{{system.description}}"
+                        {{#if editable}}{{else}}disabled{{/if}} toggled>
+            {{{enrichedBiography}}}
+          </prose-mirror>
         </div>
       </div>
     </div>

@@ -82,7 +82,10 @@
       </div>
 
       <div class="grid-img margin-top-10">
-        <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" width="150" style="max-height: 200px;"/>
+        {{!-- V1は data-edit="img" だけで画像編集が開いたが、ApplicationV2 では
+              DocumentSheetV2 の editImage アクションを明示指定する必要がある。 --}}
+        <img class="profile-img" src="{{actor.img}}" data-action="editImage" data-edit="img"
+             title="{{actor.name}}" width="150" style="max-height: 200px;"/>
       </div>
 
       <div class="grid-8 stat-grid margin-top-10">
@@ -337,7 +340,14 @@
               <label class="cell--title">
                 {{localize "DX3rd.Description"}}
               </label>
-              {{editor enrichedBiography target="system.description" button=true editable=editable }}
+              {{!-- V1の {{editor}} ヘルパーは .editor-edit を出すだけで、起動処理は
+             FormApplication#activateEditor が担っていた。ApplicationV2 には
+             それが無く編集ボタンが無反応になるため、自己完結して動作する
+             v13のカスタム要素 <prose-mirror> へ置き換える。 --}}
+          <prose-mirror name="system.description" value="{{system.description}}"
+                        {{#if editable}}{{else}}disabled{{/if}} toggled>
+            {{{enrichedBiography}}}
+          </prose-mirror>
             </div>
 
           </section>
