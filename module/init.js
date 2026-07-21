@@ -125,8 +125,13 @@ Hooks.once("init", async function () {
   // CONFIG.debug.hooks = true;
   console.log(`Initializing Double Cross 3rd System`);
 
+  // game.system.model はv12以降非推奨で、参照先はgame.modelへ移行している。
+  // どちらの環境でも初期化に失敗しないよう両方を見る。
+  const baseActorModel = game.model?.Actor?.character
+    ?? game.system?.model?.Actor?.character;
+
   game.DX3rd = {
-    baseSkills: game.system.model.Actor.character.attributes.skills,
+    baseSkills: baseActorModel?.attributes?.skills ?? {},
     itemUsage: {},
     DamageDialog: [],
   };
