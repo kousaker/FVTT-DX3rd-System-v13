@@ -272,5 +272,19 @@
   "TYPES.Item.works": "워크스",
   "TYPES.Item.syndrome": "신드롬",
   "TYPES.Item.rois": "로이스",
-  "TYPES.Item.record": "레코드"
+  "TYPES.Item.record": "레코드",
+  "DX3rd.Confirm": "확인",
+  "DX3rd.Cancel": "취소",
+  "DX3rd.Notify.CannotAutoInPressure": "[중압] 상태에서는 오토 액션을 사용할 수 없습니다.",
+  "DX3rd.Notify.CannotReactionInBerserk": "[폭주] 상태에서는 리액션을 사용할 수 없습니다.",
+  "DX3rd.Notify.MustAttackHatredTarget": "[증오] 상태에서는 증오 대상({target})을 공격해야 합니다.",
+  "DX3rd.Notify.EffectUsedUp": "이 이펙트는 사용 횟수를 초과했습니다: {name}",
+  "DX3rd.Notify.ItemUsedUp": "이 아이템은 사용 횟수를 초과했습니다: {name}",
+  "DX3rd.Notify.PsionicUsedUp": "이 사이오닉은 사용 횟수를 초과했습니다: {name}",
+  "DX3rd.Notify.CannotTitus": "이 아이템은 타이터스로 만들 수 없습니다.",
+  "DX3rd.Notify.NoSpentEffects": "사용한 이펙트가 없습니다.",
+  "DX3rd.Notify.OnlyOneDieRemovable": "제거할 수 있는 주사위는 1개까지입니다.",
+  "DX3rd.Notify.NoHealWhileBloodsucking": "[폭주: 흡혈] 상태에서는 HP를 회복할 수 없습니다.",
+  "DX3rd.Notify.InvalidAttributeKey": "속성 키에는 공백과 마침표를 사용할 수 없습니다.",
+  "DX3rd.Notify.MacroNotFound": "해당 매크로를 찾을 수 없습니다: {name}"
 }

@@ -872,7 +872,7 @@ export class DX3rdActor extends Actor {
         const isHatredMatched = selectedTargets.some(target => target.actor?.name === hatredTarget);
 
         if (!isHatredMatched) {
-          ui.notifications.info(`You must attck hatred target(${hatredTarget}) while in hatred.`);
+          ui.notifications.info(game.i18n.format("DX3rd.Notify.MustAttackHatredTarget", { target: hatredTarget }));
           return;  // 조건이 만족되면 기능 실행 중단
         }
       }
@@ -1125,7 +1125,7 @@ export class DX3rdActor extends Actor {
         {
           action: "confirm",
           icon: '<i class="fas fa-check"></i>',
-          label: "Confirm",
+          label: game.i18n.localize("DX3rd.Confirm"),
           default: true,
           callback: async (event, button, dialog) => {
             let element = dialog.element;
@@ -1249,7 +1249,7 @@ export class DX3rdActor extends Actor {
           buttons: [
             {
               action: "confirm",
-              label: "Confirm",
+              label: game.i18n.localize("DX3rd.Confirm"),
               default: true,
               callback: (event, button, dialog) => {
                 let selected = Array.from(
@@ -1337,14 +1337,14 @@ export class DX3rdActor extends Actor {
             buttons: [
               {
                 action: "confirm",
-                label: "Confirm",
+                label: game.i18n.localize("DX3rd.Confirm"),
                 default: true,
                 callback: (event, button, dialog) => {
                   let selected = Array.from(
                     dialog.element.querySelectorAll(".angel-die:checked")
                   ).map((el) => Number(el.dataset.index));
                   if (selected.length > 1) {
-                    ui.notifications.info("You can only remove up to 1 die.");
+                    ui.notifications.info(game.i18n.localize("DX3rd.Notify.OnlyOneDieRemovable"));
                     handleAngel(
                       allDiceResults,
                       invoke,
@@ -1452,7 +1452,7 @@ export class DX3rdActor extends Actor {
           macro.execute();
         } else if (diceOptions.macro != "") {
           new foundry.applications.api.DialogV2({
-            window: { title: "macro" },
+            window: { title: game.i18n.localize("DX3rd.Macro") },
             content: `Do not find this macro: ${diceOptions.macro}`,
             buttons: [],
           }).render(true);
@@ -1523,7 +1523,7 @@ Hooks.on("preUpdateActor", async (actor, updateData) => {
       // HP가 상승했을 경우 이를 방지 (현재 HP보다 새로운 HP가 높을 때)
       if (newHP > currentHP) {
         updateData.system.attributes.hp.value = currentHP; // HP 변동을 막음
-        ui.notifications.info("HP cannot increase while in Berserk: Bloodsucking.");
+        ui.notifications.info(game.i18n.localize("DX3rd.Notify.NoHealWhileBloodsucking"));
       }
     }
   }

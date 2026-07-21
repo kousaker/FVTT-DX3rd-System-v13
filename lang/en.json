@@ -187,5 +187,19 @@
   "TYPES.Item.rois": "Lois",
   "TYPES.Item.record": "Record",
   "TYPES.Item.spell": "Spell",
-  "TYPES.Item.psionic": "Psionics"
+  "TYPES.Item.psionic": "Psionics",
+  "DX3rd.Confirm": "Confirm",
+  "DX3rd.Cancel": "Cancel",
+  "DX3rd.Notify.CannotAutoInPressure": "You cannot use an auto action while under Pressure.",
+  "DX3rd.Notify.CannotReactionInBerserk": "You cannot use a reaction while Berserk.",
+  "DX3rd.Notify.MustAttackHatredTarget": "You must attack the hatred target ({target}) while in Hatred.",
+  "DX3rd.Notify.EffectUsedUp": "This effect has reached its usage limit: {name}",
+  "DX3rd.Notify.ItemUsedUp": "This item has reached its usage limit: {name}",
+  "DX3rd.Notify.PsionicUsedUp": "This psionic has reached its usage limit: {name}",
+  "DX3rd.Notify.CannotTitus": "This item cannot become a Titus.",
+  "DX3rd.Notify.NoSpentEffects": "There are no effects with spent usage.",
+  "DX3rd.Notify.OnlyOneDieRemovable": "You can only remove up to 1 die.",
+  "DX3rd.Notify.NoHealWhileBloodsucking": "HP cannot increase while Berserk: Bloodsucking.",
+  "DX3rd.Notify.InvalidAttributeKey": "Attribute keys may not contain spaces or periods.",
+  "DX3rd.Notify.MacroNotFound": "Macro not found: {name}"
 }

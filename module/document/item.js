@@ -492,7 +492,7 @@ export class DX3rdItem extends Item {
   async setTitus() {
     let type = this.system.type;
     if (type === "D" || type === "E" || type === "M") {
-      ui.notifications.info("this item cannot be titus")
+      ui.notifications.info(game.i18n.localize("DX3rd.Notify.CannotTitus"))
       return;
     }
 
@@ -510,7 +510,7 @@ export class DX3rdItem extends Item {
   async setSublimation() {
     let type = this.system.type;
     if (type === "D" || type === "E" || type === "M") {
-      ui.notifications.info("this item cannot be titus")
+      ui.notifications.info(game.i18n.localize("DX3rd.Notify.CannotTitus"))
       return;
     }
 
@@ -554,7 +554,7 @@ export class DX3rdItem extends Item {
           const usedEffects = effects.filter(effect => effect.system.used.state > 0);
 
           if (usedEffects.length === 0) {
-            ui.notifications.info("There are no effects with spent usage.");
+            ui.notifications.info(game.i18n.localize("DX3rd.Notify.NoSpentEffects"));
             return;
           };
 
@@ -832,7 +832,7 @@ export class DX3rdItem extends Item {
       await macro.execute(scope);
     } else if (this.system.macro != "")
       new foundry.applications.api.DialogV2({
-        window: { title: "macro" },
+        window: { title: game.i18n.localize("DX3rd.Macro") },
         content: `Do not find this macro: ${this.system.macro}`,
         buttons: [],
       }).render(true);

@@ -106,7 +106,7 @@ export class ComboDialog extends foundry.applications.api.HandlebarsApplicationM
             macro.execute();
         else if (effect.system.macro != "")
             foundry.applications.api.DialogV2.prompt({
-              window: { title: "macro" },
+              window: { title: game.i18n.localize("DX3rd.Macro") },
               content: `Do not find this macro: ${effect.system.macro}`,
               ok: { label: "OK" }
             });
@@ -195,7 +195,7 @@ export class ComboDialog extends foundry.applications.api.HandlebarsApplicationM
         buttons: [{
           action: "confirm",
           icon: "fas fa-check",
-          label: "Confirm",
+          label: game.i18n.localize("DX3rd.Confirm"),
           default: true,
           callback: async () => {
             let targets = game.user.targets;
@@ -211,7 +211,7 @@ export class ComboDialog extends foundry.applications.api.HandlebarsApplicationM
                     macro.execute();
                 else if (e.system.macro != "")
                     foundry.applications.api.DialogV2.prompt({
-                      window: { title: "macro" },
+                      window: { title: game.i18n.localize("DX3rd.Macro") },
                       content: `Do not find this macro: ${e.system.macro}`,
                       ok: { label: "OK" }
                     });

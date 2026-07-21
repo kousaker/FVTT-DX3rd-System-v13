@@ -15,7 +15,7 @@ export class DX3rdEffectSheet extends DX3rdAttributesSheet {
 
     const attributes = Object.values(formAttrs).reduce((obj, v) => {
       let k = v["key"].trim();
-      if ( /[\s\.]/.test(k) )  return ui.notifications.error("Attribute keys may not contain spaces or periods");
+      if ( /[\s\.]/.test(k) )  return ui.notifications.error(game.i18n.localize("DX3rd.Notify.InvalidAttributeKey"));
       delete v["key"];
 
       try {

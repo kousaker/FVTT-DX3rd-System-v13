@@ -645,7 +645,7 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       buttons: [{
         action: "one",
         icon: "fas fa-check",
-        label: "Apply",
+        label: game.i18n.localize("DX3rd.Apply"),
         default: true,
         callback: async (event, button, dialog) => {
           const input = dialog.element.querySelector("#memory")?.value;
@@ -667,7 +667,7 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       buttons: [{
         action: "one",
         icon: "fas fa-check",
-        label: "Apply",
+        label: game.i18n.localize("DX3rd.Apply"),
         default: true,
         callback: async (event, button, dialog) => {
           const eRois = dialog.element.querySelector("#rois")?.value;
@@ -716,7 +716,7 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         buttons: [{
           action: "one",
           icon: "fas fa-check",
-          label: "Apply",
+          label: game.i18n.localize("DX3rd.Apply"),
           default: true,
           callback: async () => {
             await this._applyBackTrack(`${rois}D10`, backTrackLabel, game.i18n.localize("DX3rd.EXPExtra"));

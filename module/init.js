@@ -400,7 +400,7 @@ async function chatListeners(html) {
       await macro.execute(scope);
     } else if (macroName !== "")
       new foundry.applications.api.DialogV2({
-        window: { title: "macro" },
+        window: { title: game.i18n.localize("DX3rd.Macro") },
         content: `Do not find this macro: ${macroName}`,
         buttons: [{ action: "ok", label: "OK", default: true }],
       }).render({ force: true });
@@ -434,7 +434,7 @@ async function chatListeners(html) {
     // 상태이상: 중압에 의한 오토액션 불가 //
     const timing = item.system.timing;
     if (actor.system.conditions.pressure?.active && timing === "auto") {
-      ui.notifications.info(`You cannot use auto action while in pressure.`);
+      ui.notifications.info(game.i18n.localize("DX3rd.Notify.CannotAutoInPressure"));
       return;
     }
 
@@ -446,7 +446,7 @@ async function chatListeners(html) {
       ["normal", "slaughter", "battlelust", "delusion", "hatred"].includes(berserkType);
 
     if (isUnableReaction && timing === "reaction") {
-      ui.notifications.info(`You cannot use reaction while in berserk.`);
+      ui.notifications.info(game.i18n.localize("DX3rd.Notify.CannotReactionInBerserk"));
       return;  // 조건이 만족되면 기능 실행 중단
     }
 
@@ -472,7 +472,7 @@ async function chatListeners(html) {
     if (used.disable != "notCheck") {
       let max = used.max + (used.level ? item.system.level.value : 0);
       if (used.state >= max) {
-        ui.notifications.info(`Do not use this effect: ${item.name}`);
+        ui.notifications.info(game.i18n.format("DX3rd.Notify.EffectUsedUp", { name: item.name }));
         return;
       }
     }
@@ -568,7 +568,7 @@ async function chatListeners(html) {
     // 상태이상: 중압에 의한 오토액션 불가 //
     const timing = item.system.timing;
     if (actor.system.conditions.pressure?.active && timing === "auto") {
-      ui.notifications.info(`You cannot use auto action while in pressure.`);
+      ui.notifications.info(game.i18n.localize("DX3rd.Notify.CannotAutoInPressure"));
       return;
     }
 
@@ -580,7 +580,7 @@ async function chatListeners(html) {
       ["normal", "slaughter", "battlelust", "delusion", "hatred"].includes(berserkType);
 
     if (isUnableReaction && timing === "reaction") {
-      ui.notifications.info(`You cannot use reaction while in berserk.`);
+      ui.notifications.info(game.i18n.localize("DX3rd.Notify.CannotReactionInBerserk"));
       return;  // 조건이 만족되면 기능 실행 중단
     }
 
@@ -606,7 +606,7 @@ async function chatListeners(html) {
       if (used.disable !== "notCheck") {
         let max = used.max + (used.level ? effect.system.level.value : 0);
         if (used.state >= max) {
-          ui.notifications.info(`Do not use this effect: ${effect.name}`);
+          ui.notifications.info(game.i18n.format("DX3rd.Notify.EffectUsedUp", { name: effect.name }));
           usedCheck = false;
         }
       }
@@ -820,7 +820,7 @@ async function chatListeners(html) {
     // 상태이상: 중압에 의한 오토액션 불가 //
     const timing = item.system.timing;
     if (actor.system.conditions.pressure?.active && timing === "auto") {
-      ui.notifications.info(`You cannot use auto action while in pressure.`);
+      ui.notifications.info(game.i18n.localize("DX3rd.Notify.CannotAutoInPressure"));
       return;
     }
 
@@ -832,7 +832,7 @@ async function chatListeners(html) {
       ["normal", "slaughter", "battlelust", "delusion", "hatred"].includes(berserkType);
 
     if (isUnableReaction && timing === "reaction") {
-      ui.notifications.info(`You cannot use reaction while in berserk.`);
+      ui.notifications.info(game.i18n.localize("DX3rd.Notify.CannotReactionInBerserk"));
       return;  // 조건이 만족되면 기능 실행 중단
     }
 
@@ -869,7 +869,7 @@ async function chatListeners(html) {
       hp = roll.total;
       console.log(actor.system.attributes.hp.value - hp < 0);
       if (actor.system.attributes.hp.value - hp < 0) {
-        ui.notifications.info(`Do not use this psionic: ${item.name}`);
+        ui.notifications.info(game.i18n.format("DX3rd.Notify.PsionicUsedUp", { name: item.name }));
         return;
       }
     }
@@ -888,7 +888,7 @@ async function chatListeners(html) {
     if (used.disable != "notCheck") {
       let max = used.max + (used.level ? item.system.level.value : 0);
       if (used.state >= max) {
-        ui.notifications.info(`Do not use this psionic: ${item.name}`);
+        ui.notifications.info(game.i18n.format("DX3rd.Notify.PsionicUsedUp", { name: item.name }));
         return;
       }
     }
@@ -993,7 +993,7 @@ async function chatListeners(html) {
         const isHatredMatched = targets.some(target => target.actor?.name === hatredTarget);
   
         if (!isHatredMatched) {
-          ui.notifications.info(`You must attck hatred target(${hatredTarget}) while in hatred.`);
+          ui.notifications.info(game.i18n.format("DX3rd.Notify.MustAttackHatredTarget", { target: hatredTarget }));
           return;
         }
       }
@@ -1064,7 +1064,6 @@ async function chatListeners(html) {
     const damage = Number(data.damage);
     const fear = Number(data.fear)
     const sublimation_damage = Number(actor.system.attributes.sublimation_damage_roll?.value ?? 0);
-    ui.notifications.info(`${sublimation_damage}`);
 
     const appendDamageRoll = damage + fear + sublimation_damage;
 
@@ -1111,7 +1110,7 @@ async function chatListeners(html) {
         {
           action: "confirm",
           icon: '<i class="fas fa-check"></i>',
-          label: "Confirm",
+          label: game.i18n.localize("DX3rd.Confirm"),
           default: true,
           callback: async (event, button, dialog) => {
             let ignoreArmor = dialog.element.querySelector("#ignore-armor").checked;
@@ -1254,7 +1253,7 @@ async function chatListeners(html) {
     if (item.system.used.disable != "notCheck") {
       let max = item.system.used.max + (used.level ? item.system.quantity : 0);
       if (item.system.used.state >= max) {
-        ui.notifications.info(`Do not use this item: ${item.name}`);
+        ui.notifications.info(game.i18n.format("DX3rd.Notify.ItemUsedUp", { name: item.name }));
         return;
       }
     }
@@ -1466,7 +1465,7 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
           },
           {
             action: "cancel",
-            label: "Cancel",
+            label: game.i18n.localize("DX3rd.Cancel"),
             callback: async () => {
               await effect.delete();  // 상태이상 적용 취소
             }
@@ -1511,7 +1510,7 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
           },
           {
             action: "cancel",
-            label: "Cancel",
+            label: game.i18n.localize("DX3rd.Cancel"),
             callback: async () => {
               await effect.delete();  // 상태이상 적용 취소
             }
@@ -1569,7 +1568,7 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
           },
           {
             action: "cancel",
-            label: "Cancel",
+            label: game.i18n.localize("DX3rd.Cancel"),
             callback: async () => {
               await effect.delete();  // 상태이상 적용 취소
             }
@@ -1627,7 +1626,7 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
           },
           {
             action: "cancel",
-            label: "Cancel",
+            label: game.i18n.localize("DX3rd.Cancel"),
             callback: async () => {
               await effect.delete();  // 상태이상 적용 취소
             }
