@@ -3,55 +3,60 @@ import { DX3rdAttributesSheet } from "./attributes-sheet.js";
 export class DX3rdComboSheet extends DX3rdAttributesSheet {
 
   /** @override */
-  async getData(options) {
-    let data = await super.getData(options);
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
 
-  	data.actorEffect = {};
-    data.actorWeapon = {};
+    context.actorEffect = {};
+    context.actorWeapon = {};
 
     if (this.actor != null) {
-      data.actor = this.actor;
-    	let items = this.actor.items;
+      context.actor = this.actor;
+      let items = this.actor.items;
 
-	    for (let i of items) {
-      	let item = i;
+      for (let i of items) {
+        let item = i;
 
-      	if (item.type == 'weapon' || item.type == 'vehicle')
-      		data.actorWeapon[i.id] = i.name;
-      	else if (item.type == 'effect')
-      		data.actorEffect[i.id] = i.name;
-    	}
+        if (item.type == 'weapon' || item.type == 'vehicle')
+          context.actorWeapon[i.id] = i.name;
+        else if (item.type == 'effect')
+          context.actorEffect[i.id] = i.name;
+      }
     }
 
-    return data;
+    return context;
   }
 
   /** @inheritdoc */
-  activateListeners(html) {
-    super.activateListeners(html);
+  _onRender(context, options) {
+    super._onRender(context, options);
 
-    html.find(".change-skill").change(this._onSkillChange.bind(this));
+    // Everything below here is only needed if the sheet is editable
+    if (!this.isEditable) return;
 
-    html.find(".add-effect").click(this._onEffectCreate.bind(this));
-    html.find(".add-weapon").click(this._onWeaponCreate.bind(this));
+    this.element.querySelector(".change-skill")?.addEventListener("change", this._onSkillChange.bind(this));
 
-    html.find('.item-edit').click(this._onItemEdit.bind(this));
-    html.find('.item-delete').click(this._onItemDelete.bind(this));
-    html.find('.item-label').click(this._onShowItemDetails.bind(this));
+    this.element.querySelector(".add-effect")?.addEventListener("click", this._onEffectCreate.bind(this));
+    this.element.querySelector(".add-weapon")?.addEventListener("click", this._onWeaponCreate.bind(this));
+
+    this.element.querySelectorAll(".item-edit").forEach(el => el.addEventListener("click", this._onItemEdit.bind(this)));
+    this.element.querySelectorAll(".item-delete").forEach(el => el.addEventListener("click", this._onItemDelete.bind(this)));
+    this.element.querySelectorAll(".item-label").forEach(el => el.addEventListener("click", this._onShowItemDetails.bind(this)));
   }
 
   /* -------------------------------------------- */
 
   async _onSkillChange(event) {
-    const skillId = $(event.currentTarget).val();
+    const skillId = event.currentTarget.value;
     let base = "-";
-    if (this.actor != null && "base" in this.actor.system.attributes.skills[skillId]) 
+    if (this.actor != null && "base" in this.actor.system.attributes.skills[skillId])
       base = this.actor.system.attributes.skills[skillId].base;
     else if ("base" in game.DX3rd.baseSkills[skillId])
       base = game.DX3rd.baseSkills[skillId].base;
-    $("#base").val(base);
 
-    await this._onSubmit(event);
+    const baseInput = this.element.querySelector("#base");
+    if (baseInput) baseInput.value = base;
+
+    await this.submit();
   }
 
 
@@ -68,7 +73,7 @@ export class DX3rdComboSheet extends DX3rdAttributesSheet {
 
     newKey = newKey.children[0];
     this.form.appendChild(newKey);
-    await this._onSubmit(event);
+    await this.submit();
   }
 
   /* -------------------------------------------- */
@@ -84,7 +89,7 @@ export class DX3rdComboSheet extends DX3rdAttributesSheet {
 
     newKey = newKey.children[0];
     this.form.appendChild(newKey);
-    await this._onSubmit(event);
+    await this.submit();
   }
 
   /* -------------------------------------------- */
@@ -99,7 +104,7 @@ export class DX3rdComboSheet extends DX3rdAttributesSheet {
     const li = event.currentTarget.closest(".item");
     const item = this.actor.items.get(li.dataset.itemId);
 
-    item.sheet.render(true);
+    item.sheet.render({force: true});
   }
 
   /* -------------------------------------------- */
@@ -113,18 +118,21 @@ export class DX3rdComboSheet extends DX3rdAttributesSheet {
     event.preventDefault();
     const li = event.currentTarget.closest(".item");
     li.remove();
-    await this._onSubmit(event);
+    await this.submit();
   }
 
   /* -------------------------------------------- */
 
   _onShowItemDetails(event) {
     event.preventDefault();
-    const item = $(event.currentTarget.closest('.item'));
-    const description = item.find('.item-description');
+    const item = event.currentTarget.closest('.item');
+    const description = item?.querySelector('.item-description');
 
-    item.toggleClass('open');
-    description.slideToggle();
+    item?.classList.toggle('open');
+    // 元のjQuery slideToggle()に相当するネイティブAPIは無いため、
+    // アニメーション無しの表示切り替えに単純化している。
+    if (description)
+      description.style.display = (description.style.display === 'block') ? 'none' : 'block';
   }
 
   /* -------------------------------------------- */
