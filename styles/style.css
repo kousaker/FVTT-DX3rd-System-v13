@@ -813,37 +813,46 @@
 }
 
 .dx3rd .sheet-wrapper .cell .cell--title {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -ms-flex-wrap: nowrap;
   flex-wrap: nowrap;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  -webkit-box-pack: justify;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-box-flex: 100%;
-  -ms-flex: 100%;
-  flex: 100%;
+  justify-content: center;
+  /* 元の意図は flex:100%(セル内で1行を占有)だったが、後続の
+     `flex:1; flex-basis:100px` に潰されており、狭いセルで幅が揺れていた。 */
+  flex: 1 1 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 5px;
   margin-bottom: 5px;
   font-weight: bold;
-
-
-  -webkit-box-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-  flex-basis: 100px;
   background: black;
   color: #fff;
-  justify-content: center;
-  height: 34px;
+  /* ラベルが長い言語で高さが足りなくならないよう下限指定に変更。
+     はみ出しは隠す(.plus-addon / .left-addon は .cell 基準の絶対配置なので
+     ここで clip されない)。 */
+  min-height: 34px;
+  overflow: hidden;
+}
+
+/* 長いラベルは省略記号で畳み、右のプラスボタン等へかぶらないようにする。 */
+.dx3rd .sheet-wrapper .cell .cell--title > label,
+.dx3rd .sheet-wrapper .cell .cell--title > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* セル直下の入力欄はセル幅いっぱいの1行を占有する。
+   V2既定の input 幅のままだと狭いセル(grid-2 = 約91px)からはみ出す。 */
+.dx3rd .sheet-wrapper .sheet-attributes .cell > input,
+.dx3rd .sheet-wrapper .sheet-attributes .cell > select,
+.dx3rd .sheet-wrapper .sheet-attributes .cell > textarea {
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .dx3rd .sheet-attributes .syndrome-type, .dx3rd .dice-addon, .dx3rd .cell--title .left-addon {
@@ -857,16 +866,30 @@
   margin-right: 2px;
 }
 
+/* シンドロームなど横並びの一覧は、件数が増えたら潰さず折り返す。 */
+.dx3rd .sheet-wrapper .sheet-attributes .items-list.flexrow {
+  flex-wrap: wrap;
+  gap: 4px 0;
+}
+
+/* .cell--title(min-height:34px)にぴったり重ねる。従来は top:2px/35px で
+   3pxだけ下の一覧へはみ出していた。 */
 .dx3rd .sheet-attributes .plus-addon {
   position: absolute;
-  top: 2px;
+  top: 0;
   width: 35px;
-  height: 35px;
+  height: 34px;
   right: 5px;
 }
 
 .dx3rd .sheet-attributes .plus-addon button {
   border: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
 }
 
 .dx3rd .cell--title .left-addon {
@@ -878,9 +901,14 @@
   text-align: right;
   font-size: 17px;
   font-weight: bold;
-  flex: initial;
+  /* h4 なので既定マージンを打ち消す。行幅は中身なりで、名前欄を圧迫しない。 */
+  margin: 0;
+  flex: 0 0 auto;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 2px;
+  white-space: nowrap;
 }
 
 .dx3rd .item-addon .btn-titus {
@@ -925,6 +953,7 @@
 }
 
 .dx3rd .sheet-wrapper .cell--crit {
+  flex: 0 0 auto;
   margin: 0;
   width: 40px;
   font-weight: bold;
@@ -932,9 +961,12 @@
 }
 
 .dx3rd .sheet-wrapper .checkbox-input {
+  flex: 0 0 auto;
   width: 22px;
   height: 22px;
-  margin: 2px 5px;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 2px 3px;
   text-align: center;
 }
 
@@ -1035,11 +1067,22 @@
 
 
 
+/* 編集/削除アイコンの列。チェックボックスを伴う行(シンドローム等)もあるため、
+   54px固定ではなく下限として扱い、中身が増えても潰れないようにする。 */
 .dx3rd .item-controls {
   text-align: right;
-  -webkit-box-flex: 0;
-  -ms-flex: 0 0 54px;
-  flex: 0 0 54px;
+  flex: 0 0 auto;
+  min-width: 54px;
+  white-space: nowrap;
+}
+
+.dx3rd .item-controls.flexrow {
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.dx3rd .item-controls.flexrow > * {
+  flex: 0 0 auto;
 }
 
 .dx3rd .item-controls .item-checkbox {
@@ -1185,6 +1228,13 @@
   margin: 2px;
 }
 
+/* 説明の展開(.item-description は width:100%)を次の行へ落とす。
+   V1コアの .flexrow は nowrap のため、展開すると同じ行に押し込まれて
+   名前欄やアイコン列が潰れていた。 */
+.dx3rd .sheet-wrapper .items-list .item.flexrow {
+  flex-wrap: wrap;
+}
+
 .dx3rd .cell--works .items-list .item, .dx3rd .cell--syndrome .items-list .item {
   padding: 4px;
   border: 3px solid black;
@@ -1202,9 +1252,10 @@
 .dx3rd .item-name {
   font-size: 18px;
   font-weight: bold;
-  -webkit-box-flex: 2;
-  -ms-flex: 2;
-  flex: 2;
+  flex: 2 1 0;
+  /* 長いアイテム名でも行を押し広げず折り返させる。 */
+  min-width: 0;
+  overflow-wrap: anywhere;
   margin: 0;
 }
 
