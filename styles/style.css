@@ -101,6 +101,14 @@
   overflow-y: auto;
 }
 
+/* ApplicationV2はinput/selectへ既定で padding:0 .5rem を与える。本シートは
+   幅20px・60pxといった固定px幅で組まれているため、border-boxと合わさると
+   数値が欠けて表示される(侵食率のダイス欄など)。シート内では padding を外す。 */
+.dx3rd .sheet-wrapper input,
+.dx3rd .sheet-wrapper select {
+  padding: 0;
+}
+
 .dx3rd .sheet-wrapper .sheet-header {
   width: 100%;
   margin-bottom: 10px;
@@ -766,10 +774,21 @@
   border: none;
 }
 
+/* .flexrow はFoundry V1のコアCSSが提供していたユーティリティで、V1シート
+   (.window-app)にしか適用されない。ApplicationV2(.application)では効かず、
+   横並びのはずの要素が縦積みになって次の行と重なるため、自前で定義する。
+   V1の挙動(display:flex + 直下の子は flex:1)をそのまま再現している。 */
 .dx3rd .flexrow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.dx3rd .flexrow > * {
+  flex: 1;
 }
 
 .dx3rd .tabs .item {
