@@ -1030,3 +1030,63 @@
   text-align: right;
   padding: 0 10px;
 }
+/* ============================================================================
+   ApplicationV2 互換レイヤ
+
+   本システムのテンプレートは、Foundry V1 のコアCSSが提供していた
+   レイアウト用クラス(.flexrow / .sheet-header / .profile-img / .charname /
+   .dialog-buttons 等)に依存して組まれている。これらは V1 シート
+   (.window-app 配下)にしか適用されず、ApplicationV2(.application 配下)
+   では一切効かないため、必要なものをここで自前定義する。
+   ============================================================================ */
+
+/* --- アイテムシートのヘッダ ---
+   V1コアは .sheet-header に display:flex を、.profile-img に固定サイズを
+   与えていた。V2では両方とも適用されず、画像が原寸(SVGは領域いっぱいに
+   伸長)でシート全体を覆ってしまう。 */
+.dx3rd .item .sheet-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  overflow: hidden;
+}
+
+.dx3rd .item .sheet-header .profile-img {
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  margin: 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.dx3rd .item .sheet-header .header-fields {
+  flex: 1;
+  min-width: 0;
+}
+
+/* V1コアの h1.charname 相当。既定のh1マージンと下線を打ち消す。 */
+.dx3rd .item .sheet-header .charname {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: inherit;
+  line-height: normal;
+}
+
+/* --- ダイアログのフッタ ---
+   V1 Dialog が提供していた .dialog-buttons のレイアウト。 */
+.dx3rd .dialog-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dx3rd .dialog-button {
+  flex: 1;
+}
