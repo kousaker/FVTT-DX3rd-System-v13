@@ -1263,20 +1263,22 @@ Hooks.on("applyDamage", ({ actor, data }) => {
 });
 
 Hooks.on("enterScene", (actor) => {
-  let enterDialog = new Dialog({
-    title: game.i18n.localize("DX3rd.EnterScene"),
+  let enterDialog = new foundry.applications.api.DialogV2({
+    window: { title: game.i18n.localize("DX3rd.EnterScene") },
     content: `
       <h2>${game.i18n.localize("DX3rd.EnterScene")}</h2>
     `,
-    buttons: {
-      one: {
+    buttons: [
+      {
+        action: "one",
         icon: '<i class="fas fa-check"></i>',
         label: game.i18n.localize("DX3rd.EnterScene"),
+        default: true,
         callback: async () => {
           let formula = `1D10`;
 
           let roll = new Roll(formula);
-          await roll.roll({ async: true });
+          await roll.evaluate();
 
           let before = actor.system.attributes.encroachment.value;
           let after = Number(before) + Number(roll.total);
@@ -1302,7 +1304,7 @@ Hooks.on("enterScene", (actor) => {
             {
               speaker: ChatMessage.getSpeaker({ actor: actor }),
               content: content + `</div>`,
-              type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+              rolls: [roll],
               sound: CONFIG.sounds.dice,
               roll: roll,
             },
@@ -1310,10 +1312,10 @@ Hooks.on("enterScene", (actor) => {
           );
         },
       },
-    },
+    ],
   });
 
-  enterDialog.render(true);
+  enterDialog.render({ force: true });
 });
 
 Hooks.on("createActiveEffect", async (effect, options, userId) => {
