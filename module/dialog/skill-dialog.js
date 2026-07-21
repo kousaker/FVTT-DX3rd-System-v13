@@ -1,11 +1,10 @@
 
-export class DX3rdSkillDialog extends Dialog {
-  constructor(actor, skillId, options) {
+export class DX3rdSkillDialog extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
+  constructor(actor, skillId, options = {}) {
     super(options);
 
     this.actor = actor;
     this.key = skillId;
-    let buttons = {}
 
     if (this.key != null) {
       this.option = "edit";
@@ -21,69 +20,69 @@ export class DX3rdSkillDialog extends Dialog {
         base: options.base,
         delete: true
       }
-
-      buttons = {
-        create: {
-          label: "Create",
-          callback: () => this._skillCreate()
-
-        }
-      }
     }
 
-    this.data = {
-      title: options.title,
-      content: "",
-      buttons: buttons,
-      default: 'create'
-    };
-
+    this.options.window.title = options.title;
   }
 
   /** @override */
-  static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
-      template: "systems/dx3rd/templates/dialog/skill-dialog.html",
-      classes: ["dx3rd", "dialog"],
-      width: 500
-    });
-  }
-
-
-  /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
-
-    html.find(".skill-change").change(this._skillChange.bind(this));
-    html.find(".skill-delete").click(this._skillDelete.bind(this));
-  }
+  static DEFAULT_OPTIONS = {
+    tag: "form",
+    classes: ["dx3rd", "dialog"],
+    position: { width: 500 },
+    window: { resizable: true },
+    actions: {
+      create: this.#onCreate
+    }
+  };
 
   /** @override */
-  getData() {
+  static PARTS = {
+    form: { template: "systems/dx3rd/templates/dialog/skill-dialog.html" }
+  };
+
+  /** @override */
+  async _prepareContext(options) {
     return {
-      title: this.data.title,
-      content: this.data.content,
-      buttons: this.data.buttons,
+      title: this.title,
       skill: this.skill,
       delete: (this.option == "create") ? false : this.skill.delete,
-      option: this.option 
+      option: this.option
     }
   }
 
   /** @override */
+  _onFirstRender(context, options) {
+    super._onFirstRender(context, options);
+    this.element.addEventListener("keydown", this._onKeyDown.bind(this));
+  }
+
+  /** @override */
+  _onRender(context, options) {
+    for (const el of this.element.querySelectorAll(".skill-change"))
+      el.addEventListener("change", this._skillChange.bind(this));
+
+    for (const el of this.element.querySelectorAll(".skill-delete"))
+      el.addEventListener("click", this._skillDelete.bind(this));
+  }
+
   _onKeyDown(event) {
-    if ( event.key === "Enter" && this.option == "edit")
-      return this.close();
+    if (event.key === "Enter" && this.option == "edit") {
+      event.preventDefault();
+      this.close();
+    }
+  }
 
-    return super._onKeyDown(event);
-
+  static async #onCreate(event, target) {
+    event.preventDefault();
+    await this._skillCreate();
   }
 
   async _skillChange(event) {
     event.preventDefault();
     const input = event.currentTarget;
     const type = input.dataset.type;
-    let val = $(input).val();
+    let val = input.value;
 
     if (this.option == "create")
       return;
@@ -97,7 +96,7 @@ export class DX3rdSkillDialog extends Dialog {
     await this.actor.update({[`system.attributes.skills.${this.key}.${type}`]: val});
     if (type == "point") {
       let add = this.actor.system.attributes.skills[this.key].value;
-      $("#skill-value").val("+" + add);
+      this.element.querySelector("#skill-value").value = "+" + add;
     }
   }
 
@@ -108,23 +107,28 @@ export class DX3rdSkillDialog extends Dialog {
     if (!this.skill.delete)
       return;
 
-    Dialog.confirm({
-      title: "Delete?",
+    await foundry.applications.api.DialogV2.confirm({
+      window: { title: "Delete?" },
       content: "",
-      yes: async () => {
-        await this.actor.update({[`system.attributes.skills.-=${this.key}`]: null});
-        this.close();
+      yes: {
+        callback: async () => {
+          await this.actor.update({[`system.attributes.skills.-=${this.key}`]: null});
+          this.close();
+        }
       },
-      no: () => console.log("Canceled"),
-      defaultYes: false
+      no: {
+        callback: () => console.log("Canceled")
+      }
     });
   }
 
-  async _skillCreate(event) {
-    this.key = $("#skill-key").val();
-    this.skill.name = $("#skill-name").val();
-    this.skill.point = $("#skill-point").val();
-    this.skill.base = $("#skill-base").val();
+  async _skillCreate() {
+    const root = this.element;
+
+    this.key = root.querySelector("#skill-key").value;
+    this.skill.name = root.querySelector("#skill-name").value;
+    this.skill.point = root.querySelector("#skill-point").value;
+    this.skill.base = root.querySelector("#skill-base").value;
 
     if (this.skill.point.trim() == "")
       this.skill.point = 0;
