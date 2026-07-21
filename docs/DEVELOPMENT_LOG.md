@@ -75,6 +75,24 @@ Foundry VTT v11 向けだった [ksx0330/FVTT-DX3rd-System](https://github.com/k
 
 ## 2. 実機検証手順
 
+### 2.0 自動検証スクリプト
+
+[`docs/verify-sheet-layout.js`](verify-sheet-layout.js) をF12コンソールに貼り付けると、
+はみ出し・重なり・文字衝突・コントラスト・スクロール耐性を **light / dark 両テーマ**で
+機械的に検査できる。ワールドのデータは変更しない(スクロール検査はDOMへ一時行を注入し、
+測定後に除去して再描画する)。
+
+再実行は `await verifySheetLayout()`、対象指定は `await verifySheetLayout({actorId:"..."})`。
+
+**コントラスト検査の注意**: 本システムは白い平行四辺形を `.stat-list::before` 等の
+疑似要素で描き、input 自身は `background: transparent` にしている。DOM祖先だけを
+遡って背景色を求めると暗い背景を拾い、「白地に黒文字」を「黒地に黒文字」と誤判定する。
+スクリプトは `::before` / `::after` の背景も見て実効背景色を決めている。
+
+**スクリーンショットは取得できない**(Foundryのcanvas描画のためタイムアウトする)。
+数値検査は自動化できるが、意匠として美しいかの最終判断は目視で行うこと。
+
+
 v13 サーバーへ導入し、以下を順に確認する。**F12 の開発者コンソールを開いたまま**操作し、
 `Error` と `Deprecation Warning` を拾うこと。
 
