@@ -793,8 +793,13 @@ export class DX3rdItem extends Item {
 
     await this.update({ "system.sublimation": true });
 
-    let dialog = new Dialog({
-      title: game.i18n.localize("DX3rd.Sublimation"),
+    let buttonList = Object.entries(buttons).map(([action, config]) => ({
+      action,
+      ...config,
+    }));
+
+    let dialog = new foundry.applications.api.DialogV2({
+      window: { title: game.i18n.localize("DX3rd.Sublimation") },
       content: `
         <h2>${game.i18n.localize("DX3rd.Sublimation")}: ${this.name}</h2>
         <style>
@@ -803,8 +808,10 @@ export class DX3rdItem extends Item {
         }
         </style>
       `,
-      buttons: buttons
-    }, { classes: ["dx3rd", "dialog", "sublimation"], top: 300, left: 20 }).render(true);
+      buttons: buttonList,
+      classes: ["dx3rd", "dialog", "sublimation"],
+      position: { top: 300, left: 20 },
+    }).render(true);
 
   }
 
@@ -824,10 +831,10 @@ export class DX3rdItem extends Item {
       scope.actor = actor;
       await macro.execute(scope);
     } else if (this.system.macro != "")
-      new Dialog({
-        title: "macro",
+      new foundry.applications.api.DialogV2({
+        window: { title: "macro" },
         content: `Do not find this macro: ${this.system.macro}`,
-        buttons: {}
+        buttons: [],
       }).render(true);
   }
 
