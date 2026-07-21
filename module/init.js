@@ -284,8 +284,10 @@ Hooks.on("updateActorDialog", function () {
 Hooks.on("updateItem", () => Hooks.call("updateActorDialog"));
 
 Hooks.on("getSceneControlButtons", function (controls) {
-  controls[0].tools.push({
-    name: "EnterScene",
+  if (!controls.tokens) return;
+
+  controls.tokens.tools.enterScene = {
+    name: "enterScene",
     title: game.i18n.localize("DX3rd.EnterScene"),
     icon: "fas fa-dice",
     visible: true,
@@ -311,7 +313,7 @@ Hooks.on("getSceneControlButtons", function (controls) {
       }
     },
     button: true,
-  });
+  };
 });
 
 Hooks.on("deleteCombat", async function (data, delta) {
