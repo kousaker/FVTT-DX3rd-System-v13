@@ -53,7 +53,8 @@ export class DX3rdItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
     context.system = this.item.system;
     context.editable = this.isEditable;
     context.cssClass = this.isEditable ? "editable" : "locked";
-    context.enrichedBiography = await TextEditor.enrichHTML(this.item.system.description ?? "");
+    context.enrichedBiography = await foundry.applications.ux.TextEditor.implementation
+      .enrichHTML(this.item.system.description ?? "");
 
     return context;
   }
