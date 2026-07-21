@@ -1602,3 +1602,57 @@
   background: url("../../../ui/parchment.jpg") repeat;
   color: #191813;
 }
+
+/* ============================================================================
+   実機検証で判明した表示崩れの修正 (v2.1.8)
+   ============================================================================ */
+
+/* --- 種別セレクトが「経験点」欄と重なる ---
+   エフェクト等の紹介タブで、種別セレクト(エフェクト/イージー/その他)が
+   親と同じ794pxまで広がり、絶対配置された .checkbox-addon(経験点+チェック
+   ボックス、x:1061)に107px重なっていた。結果「経験点」が読めず、
+   タブに横スクロールも発生していた。セレクトを縮ませて重なりを解消する。 */
+.dx3rd .cell--title > select.left-addon {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 200px;
+  max-width: 60%;
+}
+
+/* --- 説明欄の編集ボタンがマウスオーバーでしか出ない ---
+   Foundry既定では prose-mirror のトグルは hover 時のみ表示される。
+   編集できることが分からないため常時表示にする。 */
+.dx3rd prose-mirror button.toggle {
+  display: block;
+  opacity: 0.75;
+}
+
+.dx3rd prose-mirror button.toggle:hover {
+  opacity: 1;
+}
+
+/* --- チェックボックスが未選択時に黒く塗り潰されて見える ---
+   Foundry v13 のチェックボックスは appearance:none + ::before で描画され、
+   本シートの黒地の上では未選択でも黒い四角に見えてしまう。
+   未選択時は白抜き(白地+黒枠)にして、選択済みとの区別を付ける。 */
+.dx3rd input[type="checkbox"]::before {
+  background: #fff;
+  border: 1px solid #333;
+  box-sizing: border-box;
+}
+
+.dx3rd input[type="checkbox"]:checked::before {
+  background: #fff;
+  color: #000;
+}
+
+/* --- アイテム名が読みにくい ---
+   Foundryの見出しフォント Modesto Condensed は細く縦長のスモールキャップス風で、
+   一覧のアイテム名(New Works 等)が読み取りづらい。コントラスト比は16.98あり
+   配色の問題ではなかったため、本文フォントへ変更する。 */
+.dx3rd .items-list .item .item-label,
+.dx3rd .items-list .item .item-name {
+  font-family: var(--font-primary, "Signika"), sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}

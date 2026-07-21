@@ -2,7 +2,7 @@
   "id": "dx3rd",
   "title": "Double Cross 3rd",
   "description": "Double Cross 3rd (Foundry VTT v13 port of ksx0330/FVTT-DX3rd-System)",
-  "version": "2.1.7",
+  "version": "2.1.8",
   "compatibility": {
     "minimum": 13,
     "verified": "13.345"
