@@ -375,24 +375,18 @@ export class DX3rdCombat extends Combat {
   /* -------------------------------------------- */	
 
   async startMainDialog() {
-    let content = `
-      <div>${game.i18n.localize("DX3rd.InitiativeCharacter")}: ${this.combatant.name}</div><hr>
-      <div style="display: flex; flex-direction: column;">
-        <button class="macro-button" data-action="1">${game.i18n.localize("DX3rd.MainStart")}</button>
-        <button class="macro-button" data-action="2">${game.i18n.localize("DX3rd.ReCheck")}</button>
-      </div>
-    `;
-    let startMainDialog = new Dialog({
-      title: `${game.i18n.localize("DX3rd.Main")} ${game.i18n.localize("DX3rd.Process")}`,
-      content: content,
-      buttons: {},
-      close: () => { },
-      render: html => {
-        html.find(".macro-button").click(async ev => {
-          let action = parseInt(ev.currentTarget.dataset.action);
-          switch (action) {
-            case 1:
-              let message = `
+    const content = `<div>${game.i18n.localize("DX3rd.InitiativeCharacter")}: ${this.combatant.name}</div>`;
+
+    new foundry.applications.api.DialogV2({
+      window: { title: `${game.i18n.localize("DX3rd.Main")} ${game.i18n.localize("DX3rd.Process")}` },
+      content,
+      buttons: [
+        {
+          action: "start",
+          label: game.i18n.localize("DX3rd.MainStart"),
+          default: true,
+          callback: async () => {
+            let message = `
                 <div class="dx3rd-roll">
                   <h2 class="header"><div class="title width-100">
                     ${game.i18n.localize("DX3rd.Main")} ${game.i18n.localize("DX3rd.Process")}
@@ -402,69 +396,60 @@ export class DX3rdCombat extends Combat {
                   </div>
                 </div>
               `
-              ChatMessage.create({
-                speaker: ChatMessage.getSpeaker({ alias: "GM" }),
-                content: message,
-                style: CONST.CHAT_MESSAGE_STYLES.IC,
-              });
-              break;
-            case 2:
-              await this.resetTurn();
-              await this.initiative();
-              break;
-            default:
-              break;
+            ChatMessage.create({
+              speaker: ChatMessage.getSpeaker({ alias: "GM" }),
+              content: message,
+              style: CONST.CHAT_MESSAGE_STYLES.IC,
+            });
           }
-          startMainDialog.close();
-        });
-      }
-    });
-    startMainDialog.render(true);
+        },
+        {
+          action: "recheck",
+          label: game.i18n.localize("DX3rd.ReCheck"),
+          callback: async () => {
+            await this.resetTurn();
+            await this.initiative();
+          }
+        }
+      ]
+    }).render({ force: true });
   }
 
   async startCleanupDialog() {
-    let content = `
-      <div style="display: flex; flex-direction: column;">
-        <button class="macro-button" data-action="1">${game.i18n.localize("DX3rd.CleanupStart")}</button>
-        <button class="macro-button" data-action="2">${game.i18n.localize("DX3rd.ReCheck")}</button>
-      </div>
-    `;
-    let startCleanupDialog = new Dialog({
-      title: `${game.i18n.localize("DX3rd.Cleanup")} ${game.i18n.localize("DX3rd.Process")}`,
-      content: content,
-      buttons: {},
-      close: () => { },
-      render: html => {
-        html.find(".macro-button").click(async ev => {
-          let action = parseInt(ev.currentTarget.dataset.action);
-          switch (action) {
-            case 1:
-              let message = `
+    new foundry.applications.api.DialogV2({
+      window: { title: `${game.i18n.localize("DX3rd.Cleanup")} ${game.i18n.localize("DX3rd.Process")}` },
+      content: "",
+      buttons: [
+        {
+          action: "start",
+          label: game.i18n.localize("DX3rd.CleanupStart"),
+          default: true,
+          callback: async () => {
+            let message = `
                 <div class="dx3rd-roll">
                   <h2 class="header"><div class="title width-100">
                     ${game.i18n.localize("DX3rd.Cleanup")} ${game.i18n.localize("DX3rd.Process")}
                   </div></h2><hr>
                 </div>
               `
-              ChatMessage.create({
-                speaker: ChatMessage.getSpeaker({ alias: "GM" }),
-                content: message,
-                style: CONST.CHAT_MESSAGE_STYLES.IC,
-              });
-              this.cleanup_trigger();
-              break;
-            case 2:
-              await this.resetTurn();
-              await this.initiative();
-              break;
-            default:
-              break;
+            ChatMessage.create({
+              speaker: ChatMessage.getSpeaker({ alias: "GM" }),
+              content: message,
+              style: CONST.CHAT_MESSAGE_STYLES.IC,
+            });
+            this.cleanup_trigger();
           }
-          startCleanupDialog.close();
-        });
-      }
-    });
-    startCleanupDialog.render(true);
+        },
+        {
+          action: "recheck",
+          label: game.i18n.localize("DX3rd.ReCheck"),
+          callback: async () => {
+            await this.resetTurn();
+            await this.initiative();
+          }
+        }
+      ]
+    }).render({ force: true });
   }
 
   /* -------------------------------------------- */	
