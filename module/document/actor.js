@@ -1533,8 +1533,8 @@ Hooks.on("preUpdateActor", async (actor, updateData) => {
 
 Hooks.on("updateActor", async (actor, updateData) => {
   // HP 값이 업데이트된 경우
-  if (hasProperty(updateData, "system.attributes.hp.value")) {
-    let newHp = getProperty(updateData, "system.attributes.hp.value");
+  if (foundry.utils.hasProperty(updateData, "system.attributes.hp.value")) {
+    let newHp = foundry.utils.getProperty(updateData, "system.attributes.hp.value");
 
     // HP가 0 이하로 떨어졌을 경우
     if (newHp <= 0) {
