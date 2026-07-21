@@ -1655,7 +1655,7 @@ Hooks.on("createActiveEffect", async (effect, options, userId) => {
 
 Hooks.on("deleteActiveEffect", async (effect) => {
   let actor = effect.parent;  // 상태이상이 해제된 액터
-  let condition = effect.data.flags?.dx3rd?.statusId; // 상태이상 확인
+  let condition = effect.flags?.dx3rd?.statusId; // 상태이상 확인
 
   // 상태이상의 label이 "DX3rd.Berserk"인 경우에만 처리
   if (condition === "berserk") {
@@ -1665,7 +1665,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
       "system.conditions.berserk.type": "-"
     });
 
-    const effect = actor.effects.find(e => e.data.flags?.dx3rd?.statusId === condition);
+    const effect = actor.effects.find(e => e.flags?.dx3rd?.statusId === condition);
     if (effect) {
       await effect.delete();
     }
@@ -1679,7 +1679,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
       content: content,
-      type: CONST.CHAT_MESSAGE_TYPES.IC,
+      style: CONST.CHAT_MESSAGE_STYLES.IC,
     });
   }
 
@@ -1691,7 +1691,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
       "system.conditions.tainted.value": null
     });
 
-    const effect = actor.effects.find(e => e.data.flags?.dx3rd?.statusId === condition);
+    const effect = actor.effects.find(e => e.flags?.dx3rd?.statusId === condition);
     if (effect) {
       await effect.delete();
     }
@@ -1705,7 +1705,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
       content: content,
-      type: CONST.CHAT_MESSAGE_TYPES.IC,
+      style: CONST.CHAT_MESSAGE_STYLES.IC,
     });
   }
 
@@ -1717,7 +1717,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
       "system.conditions.hatred.target": null
     });
 
-    const effect = actor.effects.find(e => e.data.flags?.dx3rd?.statusId === condition);
+    const effect = actor.effects.find(e => e.flags?.dx3rd?.statusId === condition);
     if (effect) {
       await effect.delete();
     }
@@ -1731,7 +1731,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
       content: content,
-      type: CONST.CHAT_MESSAGE_TYPES.IC,
+      style: CONST.CHAT_MESSAGE_STYLES.IC,
     });
   }
 
@@ -1743,7 +1743,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
       "system.conditions.fear.target": null
     });
 
-    const effect = actor.effects.find(e => e.data.flags?.dx3rd?.statusId === condition);
+    const effect = actor.effects.find(e => e.flags?.dx3rd?.statusId === condition);
     if (effect) {
       await effect.delete();
     }
@@ -1757,7 +1757,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
       content: content,
-      type: CONST.CHAT_MESSAGE_TYPES.IC,
+      style: CONST.CHAT_MESSAGE_STYLES.IC,
     });
   }
 
@@ -1767,7 +1767,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
       [`system.conditions.${condition}.active`]: false
     });
 
-    const effect = actor.effects.find(e => e.data.flags?.dx3rd?.statusId === condition);
+    const effect = actor.effects.find(e => e.flags?.dx3rd?.statusId === condition);
     if (effect) {
       await effect.delete();
     }
@@ -1783,7 +1783,7 @@ Hooks.on("deleteActiveEffect", async (effect) => {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ alias: "GM" }), // GM으로 설정
       content: content,
-      type: CONST.CHAT_MESSAGE_TYPES.IC,
+      style: CONST.CHAT_MESSAGE_STYLES.IC,
     });
   }
 });
