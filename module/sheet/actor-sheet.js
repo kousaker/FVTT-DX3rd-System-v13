@@ -66,7 +66,7 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       criticalVal = Number(this.actor.system.attributes.critical.min);
     context.critical = criticalVal + Number(this.actor.system.attributes.sublimation.critical);
 
-    context.enrichedBiography = await TextEditor.enrichHTML(this.actor.system.description, { async: true });
+    context.enrichedBiography = await foundry.applications.ux.TextEditor.implementation.enrichHTML(this.actor.system.description);
 
     return context;
   }
