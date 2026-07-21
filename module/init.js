@@ -1204,38 +1204,45 @@ async function chatListeners(html) {
     }
   });
 
-  html.on("click", ".toggle-btn", async (ev) => {
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".toggle-btn");
+    if (!currentTarget) return;
     ev.preventDefault();
-    const toggler = $(ev.currentTarget);
-    const style = ev.currentTarget.dataset.style;
-    const item = toggler.parent();
-    const description = item.find("." + style);
+    const style = currentTarget.dataset.style;
+    const item = currentTarget.parentElement;
+    const description = item.querySelector("." + style);
 
-    toggler.toggleClass("open");
-    description.slideToggle();
+    currentTarget.classList.toggle("open");
+    description?.classList.toggle("open");
   });
 
-  html.on("click", ".titus", async (ev) => {
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".titus");
+    if (!currentTarget) return;
     ev.preventDefault();
-    const itemInfo = ev.currentTarget.closest(".dx3rd-item-info");
+    const itemInfo = currentTarget.closest(".dx3rd-item-info");
     const actor = game.actors.get(itemInfo.dataset.actorId);
     const item = actor.items.get(itemInfo.dataset.itemId);
 
     await item.setTitus();
   });
 
-  html.on("click", ".sublimation", async (ev) => {
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".sublimation");
+    if (!currentTarget) return;
     ev.preventDefault();
-    const itemInfo = ev.currentTarget.closest(".dx3rd-item-info");
+    const itemInfo = currentTarget.closest(".dx3rd-item-info");
     const actor = game.actors.get(itemInfo.dataset.actorId);
     const item = actor.items.get(itemInfo.dataset.itemId);
 
     await item.setSublimation();
   });
 
-  html.on("click", ".use-item", async (event) => {
-    event.preventDefault();
-    const itemInfo = event.currentTarget.closest(".dx3rd-item-info");
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".use-item");
+    if (!currentTarget) return;
+    ev.preventDefault();
+    const itemInfo = currentTarget.closest(".dx3rd-item-info");
     const actor = game.actors.get(itemInfo.dataset.actorId);
     const item = actor.items.get(itemInfo.dataset.itemId);
 
