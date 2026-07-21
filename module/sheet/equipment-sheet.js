@@ -3,11 +3,11 @@ import { DX3rdWorksSheet } from "./works-sheet.js";
 export class DX3rdEquipmentSheet extends DX3rdWorksSheet {
 
   /** @override */
-  async getData(options) {
-    let data = await super.getData(options);
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
 
-    let skills = data.system.skills;
-    let actorSkills = data.system.actorSkills;
+    let skills = context.system.skills;
+    let actorSkills = context.system.actorSkills;
 
     for (const [key, value] of Object.entries(skills)) {
       if (key in actorSkills)
@@ -17,7 +17,7 @@ export class DX3rdEquipmentSheet extends DX3rdWorksSheet {
         actorSkills[key] = value;
     }
 
-    return data;
+    return context;
   }
 
 }
