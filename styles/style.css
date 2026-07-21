@@ -180,11 +180,77 @@
 }
 
 /* ApplicationV2はinput/selectへ既定で padding:0 .5rem を与える。本シートは
-   幅20px・60pxといった固定px幅で組まれているため、border-boxと合わさると
-   数値が欠けて表示される(侵食率のダイス欄など)。シート内では padding を外す。 */
+   幅を切り詰めた欄が多く、border-boxと合わさると数値が欠けて表示される
+   (侵食率のダイス欄など)。シート内では最小限のパディングに詰める。 */
 .dx3rd .sheet-wrapper input,
 .dx3rd .sheet-wrapper select {
+  padding: 0 2px;
+}
+
+/* 特に幅の狭い欄はパディングを完全に外す。 */
+.dx3rd .sheet-wrapper .stat,
+.dx3rd .sheet-wrapper .point,
+.dx3rd .sheet-wrapper .checkbox-input,
+.dx3rd .sheet-wrapper .dice-addon input,
+.dx3rd .sheet-wrapper .title .addon {
   padding: 0;
+}
+
+/* ============================================================================
+   フォーム要素の配色(ライト/ダークテーマ非依存)
+
+   本シートは「白背景+黒文字」「黒背景+白文字」の固定配色で設計されているが、
+   style.css には input に対する color 指定が1つも無く、文字色をテーマから
+   継承していた。Foundry v13 のダークテーマでは文字色が明色になるため、
+   background:white を指定した入力欄が「白背景に明るい文字」となり値が読めない。
+   背景と文字色は必ず対で明示し、テーマ変数(--color-text-*)には頼らない。
+
+   チェックボックス/ラジオは Foundry 側のカスタム描画を壊さないよう除外する。
+   個別に黒背景+白文字としたい欄(.select-box / .progress-bar 等)は、
+   後段のより詳細度の高いルールで上書きしている。
+   ============================================================================ */
+.dx3rd input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.dx3rd select,
+.dx3rd textarea {
+  background: #fff;
+  color: #000;
+}
+
+.dx3rd option,
+.dx3rd optgroup {
+  background: #fff;
+  color: #000;
+}
+
+/* Foundry v13 は disabled/readonly の入力欄を薄い二次色+低opacityで描くため、
+   値がプレースホルダのように見えて読めない。本シートは算出値の表示に
+   disabled を多用しているので明示的に打ち消す。 */
+.dx3rd input:disabled,
+.dx3rd select:disabled,
+.dx3rd textarea:disabled,
+.dx3rd input[readonly],
+.dx3rd textarea[readonly] {
+  opacity: 1;
+  -webkit-text-fill-color: currentColor;
+}
+
+.dx3rd input::placeholder,
+.dx3rd textarea::placeholder {
+  color: #8a8a8a;
+  opacity: 1;
+}
+
+/* 幅22px程度の数値欄ではスピナーが値を覆い隠すため消す。 */
+.dx3rd input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.dx3rd input[type="number"]::-webkit-outer-spin-button,
+.dx3rd input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
 }
 
 .dx3rd .sheet-wrapper .sheet-header {
@@ -223,6 +289,17 @@
   line-height: 22px;
 }
 
+/* V2のbuttonは既定でテーマ由来の明色背景を持つ。黒地のボタンとして扱う。 */
+.dx3rd .sheet-wrapper .sheet-header .backtrack-btn button {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
 .dx3rd .sheet-wrapper .sheet-header .progress-bar {
   text-align: center;
   position: relative;
@@ -238,10 +315,13 @@
   margin-right: 6px;
 }
 
+/* 侵食率バーへ重ねる表示なので背景は透過。白文字は .progress-bar input で指定済み。 */
 .dx3rd .sheet-wrapper .sheet-header .progress-bar .dice-addon input {
   margin: 0;
   width: 20px;
   border: 0;
+  background: transparent;
+  color: #fff;
 }
 
 
@@ -576,6 +656,7 @@
 
 .dx3rd .cell--title .left-addon {
   background: white;
+  color: black;
 }
 
 .dx3rd .item-addon {
@@ -597,6 +678,7 @@
 
 .dx3rd .item-addon .btn-sublimation {
   background: white;
+  color: black;
   border: 0;
   font-weight: bold;
   width: 70px;
@@ -708,8 +790,11 @@
   width: 100px;
 }
 
+/* ヘッダ(#2d2d2d)へ直接乗せる欄なので背景は透過+白文字。 */
 .dx3rd .item .sheet-header .header-fields input {
   color: white;
+  background: transparent;
+  border: none;
   border-bottom: 2px solid #5b7094;
 }
 
@@ -989,6 +1074,7 @@
 
 .dx3rd .dialog-content .edit-list .text {
   background: white;
+  color: black;
 }
 
 .dx3rd .dialog-content .skill-delete {
@@ -1014,7 +1100,9 @@
 }
 
 .chat-message .header .title {
-  color: black;
+  /* チャット欄はテーマ配色に従う領域。black固定だとダークテーマで読めないため
+     周囲のテキスト色を継承させる。 */
+  color: inherit;
   margin-bottom: 2px;
   font-weight: bold;
   padding: 3px 0;
@@ -1083,6 +1171,7 @@
 
 .dialog .calc-dialog input {
   background: white;
+  color: black;
 }
 
 
