@@ -2,59 +2,73 @@
 import { ComboDialog } from "../dialog/combo-dialog.js";
 import { DX3rdSkillDialog } from "../dialog/skill-dialog.js";
 
-export class DX3rdActorSheet extends ActorSheet {
+const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { ActorSheetV2 } = foundry.applications.sheets;
+
+export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   /** @override */
-  static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
-      classes: ["dx3rd", "sheet", "actor"],
-      template: "systems/dx3rd/templates/sheet/actor/actor-sheet.html",
+  static DEFAULT_OPTIONS = {
+    classes: ["dx3rd", "sheet", "actor"],
+    position: {
       width: 850,
-      height: 730,
-      tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description"}],
-      dragDrop: [{dragSelector: ".items-list .item", dropSelector: null}]
-    });
-  }
+      height: 730
+    },
+    window: {
+      resizable: true
+    },
+    // このアプリ自身のルート要素を<form>にする(DocumentSheetV2既定のtag)。
+    // テンプレート側の<form>ラッパーは入れ子<form>を避けるため撤去済み。
+    tag: "form",
+    form: {
+      submitOnChange: true,
+      closeOnSubmit: false
+    },
+    // 要実機検証: v13のActorSheetV2でのDragDrop登録方式・_onDrop系メソッドの
+    // シグネチャ変更有無は未確認。ロジック自体はV1から踏襲。
+    dragDrop: [{ dragSelector: ".items-list .item", dropSelector: null }]
+  };
+
+  /** @override */
+  static PARTS = {
+    form: {
+      template: "systems/dx3rd/templates/sheet/actor/actor-sheet.html"
+    }
+  };
 
   /* -------------------------------------------- */
 
   /** @inheritdoc */
-  async getData(options) {
-    let isOwner = false;
-    let isEditable = this.isEditable;
-    let data = super.getData(options);
-    let items = {};
-    let actorData = {};
-
-    isOwner = this.document.isOwner;
-    isEditable = this.isEditable;
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
 
     // The Actor's data
-    actorData = this.actor.toObject(false);
-    data.actor = actorData;
-    data.system = this.actor.system;
+    const actorData = this.actor.toObject(false);
+    context.actor = actorData;
+    context.system = this.actor.system;
+    context.editable = this.isEditable;
 
     // Owned Items
-    data.items = actorData.items;
-    for ( let i of data.items ) {
+    context.items = actorData.items;
+    for (let i of context.items) {
       const item = this.actor.items.get(i._id);
       i.id = item._id;
     }
-    data.items.sort((a, b) => (a.sort || 0) - (b.sort || 0));
-    this._prepareCharacterItems(actorData, data.items);
+    context.items.sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    this._prepareCharacterItems(actorData, context.items);
 
     let rollType = this.actor.system.attributes.dice.view;
-    data.dice = this.actor.system.attributes.dice.value + Number(this.actor.system.attributes[rollType].dice) + Number(this.actor.system.attributes.encroachment.dice) + Number(this.actor.system.attributes.sublimation.dice);
-    data.add = this.actor.system.attributes.add.value + Number(this.actor.system.attributes[rollType].value);
+    context.dice = this.actor.system.attributes.dice.value + Number(this.actor.system.attributes[rollType].dice) + Number(this.actor.system.attributes.encroachment.dice) + Number(this.actor.system.attributes.sublimation.dice);
+    context.add = this.actor.system.attributes.add.value + Number(this.actor.system.attributes[rollType].value);
 
     let criticalVal = this.actor.system.attributes.critical.value + this.actor.system.attributes[rollType].critical;
     if (criticalVal < this.actor.system.attributes.critical.min)
       criticalVal = Number(this.actor.system.attributes.critical.min);
-    data.critical = criticalVal + Number(this.actor.system.attributes.sublimation.critical);
+    context.critical = criticalVal + Number(this.actor.system.attributes.sublimation.critical);
 
-    data.enrichedBiography = await TextEditor.enrichHTML(this.object.system.description, {async: true});
+    context.enrichedBiography = await TextEditor.enrichHTML(this.actor.system.description, { async: true });
 
-    return data;
+    return context;
   }
 
   /* -------------------------------------------- */
@@ -126,15 +140,15 @@ export class DX3rdActorSheet extends ActorSheet {
       actorData.syndromeType = game.i18n.localize("DX3rd.CrossBreed");
     else if (actorData.syndromeList.length == 3)
       actorData.syndromeType = game.i18n.localize("DX3rd.TriBreed");
-      
-    actorData.applied = Object.values(this.actor.system.attributes.applied).reduce( (acc, i) => {
+
+    actorData.applied = Object.values(this.actor.system.attributes.applied).reduce((acc, i) => {
       if (game.actors.get(i.actorId) == undefined)
         return acc;
 
       let actor = game.actors.get(i.actorId);
       if (actor.items.get(i.itemId) == undefined)
-      if (!(i.itemId in actor.items))
-        return acc;
+        if (!(i.itemId in actor.items))
+          return acc;
 
       let item = actor.items.get(i.itemId);
 
@@ -145,70 +159,88 @@ export class DX3rdActorSheet extends ActorSheet {
       acc.push(data);
       return acc;
     }, []);
-    
+
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * addEventListenerの一括登録用ヘルパー。
+   * @param {string} selector
+   * @param {string} type
+   * @param {(event: Event) => any} handler
+   */
+  _bindAll(selector, type, handler) {
+    this.element.querySelectorAll(selector).forEach(el => el.addEventListener(type, handler));
   }
 
   /* -------------------------------------------- */
 
   /** @inheritdoc */
-  activateListeners(html) {
-    super.activateListeners(html);
+  async _onRender(context, options) {
+    await super._onRender(context, options);
 
-    html.find('.ability-roll').hover(this._onUpdateDice.bind(this, 'ability'), this._onUpdateDice.bind(this, null));
-    html.find('.skill-roll').hover(this._onUpdateDice.bind(this, 'skill'), this._onUpdateDice.bind(this, null));
+    // テンプレートから<form>ラッパーを撤去したため、autocomplete属性はここで付与する
+    this.element.setAttribute("autocomplete", "off");
+
+    this._activateTabs();
+
+    this._bindAll('.ability-roll', 'mouseenter', event => this._onUpdateDice('ability', event));
+    this._bindAll('.ability-roll', 'mouseleave', event => this._onUpdateDice(null, event));
+    this._bindAll('.skill-roll', 'mouseenter', event => this._onUpdateDice('skill', event));
+    this._bindAll('.skill-roll', 'mouseleave', event => this._onUpdateDice(null, event));
 
     // Everything below here is only needed if the sheet is editable
-    if ( !this.isEditable ) return;
+    if (!this.isEditable) return;
 
-    html.find('.ability-roll').click(this._onRollAbility.bind(this));
-    html.find('.skill-roll').click(this._onRollSkill.bind(this));
+    this._bindAll('.ability-roll', 'click', this._onRollAbility.bind(this));
+    this._bindAll('.skill-roll', 'click', this._onRollSkill.bind(this));
 
-    html.find('.backtrack-roll').click(this.rollBackTrack.bind(this));
+    this._bindAll('.backtrack-roll', 'click', this.rollBackTrack.bind(this));
 
-
-    html.find('.active-check').on('click', async event => {
+    this._bindAll('.active-check', 'click', async event => {
       event.preventDefault();
       const li = event.currentTarget.closest(".item");
       const item = this.actor.items.get(li.dataset.itemId);
-      await item.update({'system.active.state': !item.system.active.state});
+      await item.update({ 'system.active.state': !item.system.active.state });
     });
 
-    html.find('.used-input').on('change', async event => {
+    this._bindAll('.used-input', 'change', async event => {
       event.preventDefault();
       const li = event.currentTarget.closest(".item");
       const item = this.actor.items.get(li.dataset.itemId);
-      await item.update({'system.used.state': +$(event.currentTarget).val()});
+      await item.update({ 'system.used.state': +event.currentTarget.value });
     });
 
-    html.find('.active-equipment').on('click', async event => {
+    this._bindAll('.active-equipment', 'click', async event => {
       event.preventDefault();
       const li = event.currentTarget.closest(".item");
       const item = this.actor.items.get(li.dataset.itemId);
-      await item.update({'system.equipment': !item.system.equipment});
+      await item.update({ 'system.equipment': !item.system.equipment });
     });
 
-    html.find('.active-titus').on('click', async event => {
+    this._bindAll('.active-titus', 'click', async event => {
       event.preventDefault();
       const li = event.currentTarget.closest(".item");
       const item = this.actor.items.get(li.dataset.itemId);
-      await item.update({'system.titus': !item.system.titus});
+      await item.update({ 'system.titus': !item.system.titus });
     });
 
-    html.find('.active-sublimation').on('click', async event => {
+    this._bindAll('.active-sublimation', 'click', async event => {
       event.preventDefault();
       const li = event.currentTarget.closest(".item");
       const item = this.actor.items.get(li.dataset.itemId);
-      await item.update({'system.sublimation': !item.system.sublimation});
+      await item.update({ 'system.sublimation': !item.system.sublimation });
     });
 
-    html.find('.btn-titus').on('click', async event => {
+    this._bindAll('.btn-titus', 'click', async event => {
       event.preventDefault();
       const li = event.currentTarget.closest(".item");
       const item = this.actor.items.get(li.dataset.itemId);
       await item.setTitus();
     });
 
-    html.find('.btn-sublimation').on('click', async event => {
+    this._bindAll('.btn-sublimation', 'click', async event => {
       event.preventDefault();
       const li = event.currentTarget.closest(".item");
       const item = this.actor.items.get(li.dataset.itemId);
@@ -216,20 +248,20 @@ export class DX3rdActorSheet extends ActorSheet {
     });
 
 
-    html.find('.skill-create').click(this._onSkillCreate.bind(this));
-    html.find('.skill-edit').click(this._onShowSkillDialog.bind(this));
+    this._bindAll('.skill-create', 'click', this._onSkillCreate.bind(this));
+    this._bindAll('.skill-edit', 'click', this._onShowSkillDialog.bind(this));
 
     // Owned Item management
-    html.find('.item-create').click(this._onItemCreate.bind(this));
-    html.find('.item-edit').click(this._onItemEdit.bind(this));
-    html.find('.item-delete').click(this._onItemDelete.bind(this));
+    this._bindAll('.item-create', 'click', this._onItemCreate.bind(this));
+    this._bindAll('.item-edit', 'click', this._onItemEdit.bind(this));
+    this._bindAll('.item-delete', 'click', this._onItemDelete.bind(this));
 
     // Talent
-    html.find('.item-label').click(this._onShowItemDetails.bind(this));
-    html.find(".echo-item").click(this._echoItemDescription.bind(this));
+    this._bindAll('.item-label', 'click', this._onShowItemDetails.bind(this));
+    this._bindAll('.echo-item', 'click', this._echoItemDescription.bind(this));
 
-    html.find(".show-applied").on('click', async event => {
-            const list = {attack: "DX3rd.Attack", damage_roll: "DX3rd.DamageRoll",dice: "DX3rd.Dice", add: "DX3rd.Add", critical: "DX3rd.Critical", critical_min: "DX3rd.CriticalMin", hp: "DX3rd.HP", init: "DX3rd.Init", armor: "DX3rd.Armor", guard: "DX3rd.Guard", saving: "DX3rd.Saving", saving_max: "DX3rd.Saving", stock_point: "DX3rd.Stock", battleMove: "DX3rd.BattleMove", fullMove: "DX3rd.FullMove", major_dice: "DX3rd.MajorDice", major: "DX3rd.MajorAdd", major_critical: "DX3rd.MajorCritical", reaction_dice: "DX3rd.ReactionDice", reaction: "DX3rd.ReactionAdd", reaction_critical: "DX3rd.ReactionCritical", dodge_dice: "DX3rd.DodgeDice", dodge: "DX3rd.DodgeAdd", dodge_critical: "DX3rd.DodgeCritical", body_add: "DX3rd.BodyAdd", body_dice: "DX3rd.BodyDice", sense_add: "DX3rd.SenseAdd", sense_dice: "DX3rd.SenseDice", mind_add: "DX3rd.MindAdd", mind_dice: "DX3rd.MindDice", social_add: "DX3rd.SocialAdd", social_dice: "DX3rd.SocialDice", casting_dice: "DX3rd.CastingDice", casting_add: "DX3rd.CastingAdd", };
+    this._bindAll('.show-applied', 'click', async event => {
+      const list = { attack: "DX3rd.Attack", damage_roll: "DX3rd.DamageRoll", dice: "DX3rd.Dice", add: "DX3rd.Add", critical: "DX3rd.Critical", critical_min: "DX3rd.CriticalMin", hp: "DX3rd.HP", init: "DX3rd.Init", armor: "DX3rd.Armor", guard: "DX3rd.Guard", saving: "DX3rd.Saving", saving_max: "DX3rd.Saving", stock_point: "DX3rd.Stock", battleMove: "DX3rd.BattleMove", fullMove: "DX3rd.FullMove", major_dice: "DX3rd.MajorDice", major: "DX3rd.MajorAdd", major_critical: "DX3rd.MajorCritical", reaction_dice: "DX3rd.ReactionDice", reaction: "DX3rd.ReactionAdd", reaction_critical: "DX3rd.ReactionCritical", dodge_dice: "DX3rd.DodgeDice", dodge: "DX3rd.DodgeAdd", dodge_critical: "DX3rd.DodgeCritical", body_add: "DX3rd.BodyAdd", body_dice: "DX3rd.BodyDice", sense_add: "DX3rd.SenseAdd", sense_dice: "DX3rd.SenseDice", mind_add: "DX3rd.MindAdd", mind_dice: "DX3rd.MindDice", social_add: "DX3rd.SocialAdd", social_dice: "DX3rd.SocialDice", casting_dice: "DX3rd.CastingDice", casting_add: "DX3rd.CastingAdd", };
 
       const li = event.currentTarget.closest(".item");
       let attr = this.actor.system.attributes.applied[li.dataset.itemId].attributes;
@@ -248,43 +280,74 @@ export class DX3rdActorSheet extends ActorSheet {
       }).render(true);
     });
 
-    html.find(".remove-applied").on('click', async event => {
+    this._bindAll('.remove-applied', 'click', async event => {
       const li = event.currentTarget.closest(".item");
-      await this.actor.update({[`system.attributes.applied.-=${li.dataset.itemId}`]: null});
+      await this.actor.update({ [`system.attributes.applied.-=${li.dataset.itemId}`]: null });
     });
 
-    html.find(".use-item").on('click', async event => {
+    this._bindAll('.use-item', 'click', async event => {
       const li = event.currentTarget.closest(".item");
       const item = this.actor.items.get(li.dataset.itemId);
       await item.use(this.document);
-    })
+    });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * ナビゲーション(.sheet-tabs)とタブ本体(.sheet-body > .tab)の
+   * アクティブ状態切り替えを行う。ApplicationV2にはV1のTabsヘルパーに
+   * 相当する仕組みが自動適用されないため、ここで手動実装する。
+   * アクティブタブは再描画をまたいでインスタンスに保持する(既定: description)。
+   */
+  _activateTabs() {
+    const navItems = this.element.querySelectorAll(".sheet-tabs .item");
+    const tabs = this.element.querySelectorAll(".sheet-body > .tab");
+    const activeTab = this._activeTab ?? "description";
+
+    const setActive = tabName => {
+      this._activeTab = tabName;
+      navItems.forEach(nav => nav.classList.toggle("active", nav.dataset.tab === tabName));
+      tabs.forEach(tab => tab.classList.toggle("active", tab.dataset.tab === tabName));
+    };
+
+    navItems.forEach(nav => {
+      nav.addEventListener("click", event => {
+        event.preventDefault();
+        setActive(event.currentTarget.dataset.tab);
+      });
+    });
+
+    setActive(activeTab);
   }
 
   /* -------------------------------------------- */
 
   /** @override */
-  setPosition(options={}) {
+  setPosition(options = {}) {
     const position = super.setPosition(options);
-    const sheetBody = this.element.find(".sheet-body");
-    const bodyHeight = position.height;
-    sheetBody.css("height", bodyHeight - 300);
+    const sheetBody = this.element.querySelector(".sheet-body");
+    if (sheetBody) {
+      const bodyHeight = position.height;
+      sheetBody.style.height = `${bodyHeight - 300}px`;
+    }
     return position;
   }
 
   /* -------------------------------------------- */
 
-  async _onUpdateDice(type) {
+  _onUpdateDice(type, event) {
     const wrapper = event.currentTarget.closest(".sheet-wrapper");
-    let dice = $(wrapper).find("#dice");
-    let critical = $(wrapper).find("#critical");
-    let add = $(wrapper).find("#add");
+    if (!wrapper) return;
+    const dice = wrapper.querySelector("#dice");
+    const critical = wrapper.querySelector("#critical");
+    const add = wrapper.querySelector("#add");
 
     let diceOptions = {};
 
     if (type == 'ability') {
       const li = event.currentTarget.closest(".ability");
       const key = li.dataset.abilityId;
-      const ability = this.actor.system.attributes[key];
 
       diceOptions.base = key;
       diceOptions.skill = null;
@@ -302,21 +365,21 @@ export class DX3rdActorSheet extends ActorSheet {
     } else {
       let rollType = this.actor.system.attributes.dice.view;
 
-      dice.val(this.actor.system.attributes.dice.value + Number(this.actor.system.attributes[rollType].dice) + Number(this.actor.system.attributes.encroachment.dice) + Number(this.actor.system.attributes.sublimation.dice));
-      add.val(this.actor.system.attributes.add.value + Number(this.actor.system.attributes[rollType].value));
+      dice.value = this.actor.system.attributes.dice.value + Number(this.actor.system.attributes[rollType].dice) + Number(this.actor.system.attributes.encroachment.dice) + Number(this.actor.system.attributes.sublimation.dice);
+      add.value = this.actor.system.attributes.add.value + Number(this.actor.system.attributes[rollType].value);
 
       let criticalVal = this.actor.system.attributes.critical.value + this.actor.system.attributes[rollType].critical;
       if (criticalVal < this.actor.system.attributes.critical.min)
         criticalVal = Number(this.actor.system.attributes.critical.min);
-      critical.val(criticalVal + Number(this.actor.system.attributes.sublimation.critical));
-      
+      critical.value = criticalVal + Number(this.actor.system.attributes.sublimation.critical);
+
       return;
     }
 
     let ret = this.actor._getDiceData(diceOptions);
-    dice.val(ret.dice);
-    critical.val(ret.critical);
-    add.val(ret.add);
+    dice.value = ret.dice;
+    critical.value = ret.critical;
+    add.value = ret.add;
 
   }
 
@@ -326,7 +389,6 @@ export class DX3rdActorSheet extends ActorSheet {
     event.preventDefault();
     const li = event.currentTarget.closest(".ability");
     const key = li.dataset.abilityId;
-    const ability = this.actor.system.attributes[key];
     const title = game.i18n.localize("DX3rd." + key[0].toUpperCase() + key.slice(1));
 
     const diceOptions = {
@@ -337,7 +399,7 @@ export class DX3rdActorSheet extends ActorSheet {
     let append = false;
     if (event.ctrlKey)
       append = true;
-    
+
     Dialog.confirm({
       title: game.i18n.localize("DX3rd.Combo"),
       content: "",
@@ -365,7 +427,7 @@ export class DX3rdActorSheet extends ActorSheet {
     let append = false;
     if (event.ctrlKey)
       append = true;
-    
+
     Dialog.confirm({
       title: game.i18n.localize("DX3rd.Combo"),
       content: "",
@@ -381,8 +443,8 @@ export class DX3rdActorSheet extends ActorSheet {
   _onSkillCreate(event) {
     event.preventDefault();
     const key = event.currentTarget.dataset.abilityId;
-    
-    new DX3rdSkillDialog(this.actor, null, {"title": game.i18n.localize("DX3rd.CreateSkill"), base: key}).render(true);
+
+    new DX3rdSkillDialog(this.actor, null, { "title": game.i18n.localize("DX3rd.CreateSkill"), base: key }).render(true);
   }
 
   /* -------------------------------------------- */
@@ -392,11 +454,11 @@ export class DX3rdActorSheet extends ActorSheet {
     const li = event.currentTarget.closest(".skill");
     const key = li.dataset.skillId;
 
-    new DX3rdSkillDialog(this.actor, key, {"title": game.i18n.localize("DX3rd.EditSkill")}).render(true);
+    new DX3rdSkillDialog(this.actor, key, { "title": game.i18n.localize("DX3rd.EditSkill") }).render(true);
   }
 
   /* -------------------------------------------- */
-   
+
   /**
    * Handle creating a new Owned Item for the actor using initial data defined in the HTML dataset
    * @param {Event} event   The originating click event
@@ -406,7 +468,7 @@ export class DX3rdActorSheet extends ActorSheet {
     event.preventDefault();
     const header = event.currentTarget;
     const type = header.dataset.type;
-    const data = duplicate(header.dataset);
+    const data = foundry.utils.duplicate(header.dataset);
     delete data["type"];
 
     if (type == 'effect')
@@ -421,7 +483,6 @@ export class DX3rdActorSheet extends ActorSheet {
       img: `icons/svg/${header.dataset.img}.svg`,
       system: data
     };
-    //delete itemData.data["type"];
     await this.actor.createEmbeddedDocuments('Item', [itemData], {});
   }
 
@@ -457,12 +518,15 @@ export class DX3rdActorSheet extends ActorSheet {
 
   _onShowItemDetails(event) {
     event.preventDefault();
-    const toggler = $(event.currentTarget);
-    const item = toggler.parents('.item');
-    const description = item.find('.item-description');
+    const toggler = event.currentTarget;
+    const item = toggler.closest('.item');
+    const description = item?.querySelector('.item-description');
 
-    toggler.toggleClass('open');
-    description.slideToggle();
+    toggler.classList.toggle('open');
+    // 元のjQuery slideToggle()に相当するネイティブAPIは無いため、
+    // アニメーション無しの表示切り替えに単純化している。
+    if (description)
+      description.style.display = (description.style.display === 'block') ? 'none' : 'block';
   }
 
   /* -------------------------------------------- */
@@ -479,12 +543,10 @@ export class DX3rdActorSheet extends ActorSheet {
 
   /** @inheritdoc */
   async _onDropActor(event, data) {
-    if ( !this.actor.isOwner ) return false;
+    if (!this.actor.isOwner) return false;
 
     const actor = await Actor.implementation.fromDropData(data);
-    const actorData = actor.toObject();
 
-    const name = ``;
     const itemData = {
       name: actor.name,
       img: actor.img,
@@ -495,7 +557,9 @@ export class DX3rdActorSheet extends ActorSheet {
     };
 
     // Handle item sorting within the same Actor
-    if ( this.actor.uuid === actor.parent?.uuid ) return this._onSortItem(event, itemData);
+    // 要実機検証: v13のActorSheetV2で_onSortItem/_onDropItemCreateの
+    // シグネチャが変わっていないか確認すること。
+    if (this.actor.uuid === actor.parent?.uuid) return this._onSortItem(event, itemData);
 
     // Create the owned item
     return this._onDropItemCreate(itemData);
@@ -524,22 +588,22 @@ export class DX3rdActorSheet extends ActorSheet {
           icon: '<i class="fas fa-check"></i>',
           label: "Apply",
           callback: async () => {
-            let formula =`${rois}D10`;
+            let formula = `${rois}D10`;
 
             let roll = new Roll(formula);
-            await roll.roll({async: true})
+            await roll.evaluate();
 
             let before = this.actor.system.attributes.encroachment.value;
             let after = (before - roll.total < 0) ? 0 : before - roll.total;
 
-            await this.actor.update({"system.attributes.encroachment.value": after});
+            await this.actor.update({ "system.attributes.encroachment.value": after });
 
             let rollMode = game.settings.get("core", "rollMode");
             let rollData = await roll.render();
             let content = `
               <div class="dx3rd-roll">
                 <h2 class="header"><div class="title width-100">
-                  ${game.i18n.localize("DX3rd.BackTrack")} 
+                  ${game.i18n.localize("DX3rd.BackTrack")}
                   <div style="font-size: smaller; color: gray; float: right;">${game.i18n.localize("DX3rd.EXPExtra")}</div>
                 </div></h2>
                 <div class="context-box">
@@ -549,12 +613,12 @@ export class DX3rdActorSheet extends ActorSheet {
             `;
 
             ChatMessage.create({
-              speaker: ChatMessage.getSpeaker({actor: this.actor}),
+              speaker: ChatMessage.getSpeaker({ actor: this.actor }),
               content: content + `</div>`,
-              type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+              style: CONST.CHAT_MESSAGE_STYLES.OTHER,
               sound: CONFIG.sounds.dice,
-              roll: roll,
-            }, {rollMode});
+              rolls: [roll],
+            }, { rollMode });
 
           }
         }
@@ -571,15 +635,15 @@ export class DX3rdActorSheet extends ActorSheet {
           icon: '<i class="fas fa-check"></i>',
           label: "X 1",
           callback: async () => {
-            let formula =`${rois}D10`;
+            let formula = `${rois}D10`;
 
             let roll = new Roll(formula);
-            await roll.roll({async: true})
+            await roll.evaluate();
 
             let before = this.actor.system.attributes.encroachment.value;
             let after = (before - roll.total < 0) ? 0 : before - roll.total;
 
-            await this.actor.update({"system.attributes.encroachment.value": after});
+            await this.actor.update({ "system.attributes.encroachment.value": after });
 
             let rollMode = game.settings.get("core", "rollMode");
             let rollData = await roll.render();
@@ -593,12 +657,12 @@ export class DX3rdActorSheet extends ActorSheet {
             `;
 
             ChatMessage.create({
-              speaker: ChatMessage.getSpeaker({actor: this.actor}),
+              speaker: ChatMessage.getSpeaker({ actor: this.actor }),
               content: content + `</div>`,
-              type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+              style: CONST.CHAT_MESSAGE_STYLES.OTHER,
               sound: CONFIG.sounds.dice,
-              roll: roll,
-            }, {rollMode});
+              rolls: [roll],
+            }, { rollMode });
 
             if (this.actor.system.attributes.encroachment.value >= 100)
               extraBackTrackDialog.render(true);
@@ -608,22 +672,22 @@ export class DX3rdActorSheet extends ActorSheet {
           icon: '<i class="fas fa-times"></i>',
           label: "X 2",
           callback: async () => {
-            let formula =`${rois * 2}D10`;
+            let formula = `${rois * 2}D10`;
 
             let roll = new Roll(formula);
-            await roll.roll({async: true})
+            await roll.evaluate();
 
             let before = this.actor.system.attributes.encroachment.value;
             let after = (before - roll.total < 0) ? 0 : before - roll.total;
 
-            await this.actor.update({"system.attributes.encroachment.value": after});
+            await this.actor.update({ "system.attributes.encroachment.value": after });
 
             let rollMode = game.settings.get("core", "rollMode");
             let rollData = await roll.render();
             let content = `
               <div class="dx3rd-roll">
                 <h2 class="header"><div class="title width-100">
-                  ${game.i18n.localize("DX3rd.BackTrack")} 
+                  ${game.i18n.localize("DX3rd.BackTrack")}
                   <div style="font-size: smaller; color: gray; float: right;">${game.i18n.localize("DX3rd.EXPx2")}</div>
                 </div></h2>
                 <div class="context-box">
@@ -633,12 +697,12 @@ export class DX3rdActorSheet extends ActorSheet {
             `;
 
             ChatMessage.create({
-              speaker: ChatMessage.getSpeaker({actor: this.actor}),
+              speaker: ChatMessage.getSpeaker({ actor: this.actor }),
               content: content + `</div>`,
-              type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+              style: CONST.CHAT_MESSAGE_STYLES.OTHER,
               sound: CONFIG.sounds.dice,
-              roll: roll,
-            }, {rollMode});
+              rolls: [roll],
+            }, { rollMode });
 
             if (this.actor.system.attributes.encroachment.value >= 100)
               extraBackTrackDialog.render(true);
@@ -660,17 +724,17 @@ export class DX3rdActorSheet extends ActorSheet {
           icon: '<i class="fas fa-check"></i>',
           label: "Apply",
           callback: async () => {
-            let eRois = $("#rois").val();
+            let eRois = document.getElementById("rois")?.value;
             if (eRois != "" && eRois != 0) {
-              let formula =`${eRois}D10`;
+              let formula = `${eRois}D10`;
 
               let roll = new Roll(formula);
-              await roll.roll({async: true})
+              await roll.evaluate();
 
               let before = this.actor.system.attributes.encroachment.value;
               let after = (before - roll.total < 0) ? 0 : before - roll.total;
 
-              await this.actor.update({"system.attributes.encroachment.value": after});
+              await this.actor.update({ "system.attributes.encroachment.value": after });
 
               let rollMode = game.settings.get("core", "rollMode");
               let rollData = await roll.render();
@@ -685,12 +749,12 @@ export class DX3rdActorSheet extends ActorSheet {
               `;
 
               ChatMessage.create({
-                speaker: ChatMessage.getSpeaker({actor: this.actor}),
+                speaker: ChatMessage.getSpeaker({ actor: this.actor }),
                 content: content + `</div>`,
-                type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 sound: CONFIG.sounds.dice,
-                roll: roll,
-              }, {rollMode});
+                rolls: [roll],
+              }, { rollMode });
             }
 
           }
@@ -711,17 +775,17 @@ export class DX3rdActorSheet extends ActorSheet {
           icon: '<i class="fas fa-check"></i>',
           label: "Apply",
           callback: async () => {
-            let memoryInput = $("#memory").val();
+            let memoryInput = document.getElementById("memory")?.value;
             if (memoryInput != "" && memoryInput != 0) {
-              let formula =`${(memoryInput > memory) ? memory * 10 : memoryInput * 10}`;
+              let formula = `${(memoryInput > memory) ? memory * 10 : memoryInput * 10}`;
 
               let roll = new Roll(formula);
-              await roll.roll({async: true})
+              await roll.evaluate();
 
               let before = this.actor.system.attributes.encroachment.value;
               let after = (before - roll.total < 0) ? 0 : before - roll.total;
 
-              await this.actor.update({"system.attributes.encroachment.value": after});
+              await this.actor.update({ "system.attributes.encroachment.value": after });
 
               let rollMode = game.settings.get("core", "rollMode");
               let rollData = await roll.render();
@@ -736,12 +800,12 @@ export class DX3rdActorSheet extends ActorSheet {
               `;
 
               ChatMessage.create({
-                speaker: ChatMessage.getSpeaker({actor: this.actor}),
+                speaker: ChatMessage.getSpeaker({ actor: this.actor }),
                 content: content + `</div>`,
-                type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 sound: CONFIG.sounds.dice,
-                roll: roll,
-              }, {rollMode});
+                rolls: [roll],
+              }, { rollMode });
             }
 
           }
