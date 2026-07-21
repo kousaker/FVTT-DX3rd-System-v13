@@ -1,7 +1,7 @@
 {
   "id": "dx3rd",
   "title": "Double Cross 3rd",
-  "description": "Double Cross 3rd",
+  "description": "Double Cross 3rd (Foundry VTT v13 port of ksx0330/FVTT-DX3rd-System)",
   "version": "2.0.0",
   "compatibility": {
     "minimum": 13,
@@ -34,13 +34,15 @@
         {"lang": "ja", "name": "日本語", "path": "lang/ja.json"},
         {"lang": "en", "name": "English", "path": "lang/en.json"}
   ],
-  "gridDistance": 1,
-  "gridUnits": "m",
+  "grid": {
+    "distance": 1,
+    "units": "m"
+  },
   "socket": true,
   "primaryTokenAttribute": "attributes.hp",
   "secondaryTokenAttribute": "attributes.encroachment",
-  "url": "https://github.com/ksx0330/FVTT-DX3rd-System",
-  "manifest": "https://raw.githubusercontent.com/ksx0330/FVTT-DX3rd-System/master/system.json",
-  "download": "https://codeload.github.com/ksx0330/FVTT-DX3rd-System/zip/main",
+  "url": "https://github.com/kousaker/FVTT-DX3rd-System-v13",
+  "manifest": "https://raw.githubusercontent.com/kousaker/FVTT-DX3rd-System-v13/main/system.json",
+  "download": "https://codeload.github.com/kousaker/FVTT-DX3rd-System-v13/zip/main",
   "license": "LICENSE.txt"
 }
