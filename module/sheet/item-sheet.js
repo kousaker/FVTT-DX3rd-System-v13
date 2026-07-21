@@ -7,8 +7,11 @@ export class DX3rdItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
   static DEFAULT_OPTIONS = {
     classes: ["dx3rd", "sheet", "item"],
     position: {
-      width: 520,
-      height: 480
+      // 520pxではエフェクトの「効果」タブの表(素で549px、ラベルを折り返さない
+      // 場合742px必要)が収まらず、ラベルが2〜3行に折り返していた。
+      // 実機計測で 700px なら表幅666pxとなり、折り返しもはみ出しも無くなる。
+      width: 700,
+      height: 520
     },
     window: {
       resizable: true
