@@ -1015,7 +1015,7 @@ export class DX3rdActor extends Actor {
     // 주사위 공식 생성
     let formula = `${dice}dx${critical} + ${add}`;
     let roll = new Roll(formula);
-    await roll.roll({ async: true });
+    await roll.evaluate();
 
     let rollMode = game.settings.get("core", "rollMode");
     let rollData = await roll.render();
@@ -1038,9 +1038,8 @@ export class DX3rdActor extends Actor {
       {
         speaker: ChatMessage.getSpeaker({ actor: this }),
         content: content,
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: [roll],
         sound: CONFIG.sounds.dice,
-        roll: roll,
       },
       { rollMode }
     );
