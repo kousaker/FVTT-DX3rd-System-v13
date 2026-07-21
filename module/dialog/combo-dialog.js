@@ -1,14 +1,14 @@
 
 import { WeaponDialog } from "./weapon-dialog.js";
 
-export class ComboDialog extends Dialog {
+export class ComboDialog extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
 
-  constructor(actor, title, diceOptions, append, options) {
+  constructor(actor, title, diceOptions, append, options = {}) {
     super(options);
 
     this.actor = actor;
 
-    this.chatTitle = game.i18n.localize("DX3rd.Combo") + ": " + title; 
+    this.chatTitle = game.i18n.localize("DX3rd.Combo") + ": " + title;
     this.skillId = diceOptions.skill;
     this.base = diceOptions.base;
 
@@ -18,42 +18,27 @@ export class ComboDialog extends Dialog {
       this.skill = "-";
 
     this.append = append;
-
-    this.data = {
-      title: game.i18n.localize("DX3rd.Combo"),
-      content: "",
-      buttons: {
-        create: {
-          label: "Apply",
-          callback: () => this._onSubmit()
-
-        }
-      },
-      default: 'create'
-    };
-
   }
 
   /** @override */
-  static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
-      template: "systems/dx3rd/templates/dialog/combo-dialog.html",
-      classes: ["dx3rd", "dialog"],
-      width: 600
-    });
-  }
+  static DEFAULT_OPTIONS = {
+    tag: "form",
+    classes: ["dx3rd", "dialog"],
+    position: { width: 600 },
+    window: { title: "DX3rd.Combo", resizable: true },
+    actions: {
+      submit: this.#onSubmit
+    }
+  };
 
   /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
-
-    html.find('.item-label').click(this._onShowItemDetails.bind(this));
-    html.find(".echo-item").click(this._echoItemDescription.bind(this));
-  }
+  static PARTS = {
+    form: { template: "systems/dx3rd/templates/dialog/combo-dialog.html" }
+  };
 
   /** @override */
-  getData() {
-    let actorSkills = duplicate(this.actor.system.attributes.skills);
+  async _prepareContext(options) {
+    let actorSkills = foundry.utils.deepClone(this.actor.system.attributes.skills);
     let effectList = [];
 
     for (let i of this.actor.items) {
@@ -63,9 +48,7 @@ export class ComboDialog extends Dialog {
 
     return {
       title: this.title,
-      content: this.data.content,
-      buttons: this.data.buttons,
-      
+
       actor: this.actor,
       skill: this.skillId,
       base: this.base,
@@ -74,20 +57,33 @@ export class ComboDialog extends Dialog {
     }
   }
 
+  /** @override */
+  _onRender(context, options) {
+    for (const el of this.element.querySelectorAll('.item-label'))
+      el.addEventListener('click', this._onShowItemDetails.bind(this));
+
+    for (const el of this.element.querySelectorAll('.echo-item'))
+      el.addEventListener('click', this._echoItemDescription.bind(this));
+  }
+
+  static async #onSubmit(event, target) {
+    event.preventDefault();
+    await this._onSubmit();
+  }
+
   async _onSubmit() {
     let effectList = [];
     let macroList = [];
-    let applied = {};
     let key = this.id;
-    
+
     let encroachStr = [];
     let encroach = 0;
 
-    await $(".active-effect").each(async (i, val) => {
-      if ($(val).is(":checked")) {
-        let effect = this.actor.items.get(val.dataset.id);
+    for (const el of this.element.querySelectorAll(".active-effect")) {
+      if (el.checked) {
+        let effect = this.actor.items.get(el.dataset.id);
         effectList.push(effect);
-        
+
         if ( Number.isNaN(Number(effect.system.encroach.value)) )
           encroachStr.push(effect.system.encroach.value);
         else
@@ -98,7 +94,7 @@ export class ComboDialog extends Dialog {
             updates["system.active.state"] = true;
         await effect.update(updates);
       }
-    });
+    }
 
     if (encroachStr.length > 0)
         encroach += "+" + encroachStr.join("+");
@@ -109,11 +105,11 @@ export class ComboDialog extends Dialog {
         if (macro != undefined)
             macro.execute();
         else if (effect.system.macro != "")
-            new Dialog({
-                title: "macro",
-                content: `Do not find this macro: ${effect.system.macro}`,
-                buttons: {}
-            }).render(true);
+            foundry.applications.api.DialogV2.prompt({
+              window: { title: "macro" },
+              content: `Do not find this macro: ${effect.system.macro}`,
+              ok: { label: "OK" }
+            });
       } else
         macroList.push(effect);
     }
@@ -121,10 +117,11 @@ export class ComboDialog extends Dialog {
     Hooks.call("setActorCost", this.actor, key, "encroachment", encroach);
 
 
-    let skill = $("#skill").val();
-    let base = $("#base").val();
-    let rollType = $("#roll").val();
-    let attackRoll = $("#attackRoll").val();
+    const root = this.element;
+    let skill = root.querySelector("#skill").value;
+    let base = root.querySelector("#base").value;
+    let rollType = root.querySelector("#roll").value;
+    let attackRoll = root.querySelector("#attackRoll").value;
 
 
     let content = `<button class="chat-btn toggle-btn" data-style="effect-list">${game.i18n.localize("DX3rd.Effect")}</button>
@@ -138,9 +135,9 @@ export class ComboDialog extends Dialog {
 
       content += `<span class="item-label">[${e.system.level.value}] ${e.name}<br>
               <span style="color : gray; font-size : smaller;">
-                ${game.i18n.localize("DX3rd.Timing")} : ${ Handlebars.compile('{{timing arg}}')({arg: e.system.timing}) } / 
-                ${game.i18n.localize("DX3rd.Skill")} : ${ Handlebars.compile('{{skillByKey actor key}}')({actor: this.actor, key: e.system.skill}) } / 
-                ${game.i18n.localize("DX3rd.Target")} : ${e.system.target} / 
+                ${game.i18n.localize("DX3rd.Timing")} : ${ Handlebars.compile('{{timing arg}}')({arg: e.system.timing}) } /
+                ${game.i18n.localize("DX3rd.Skill")} : ${ Handlebars.compile('{{skillByKey actor key}}')({actor: this.actor, key: e.system.skill}) } /
+                ${game.i18n.localize("DX3rd.Target")} : ${e.system.target} /
                 ${game.i18n.localize("DX3rd.Range")} : ${e.system.range} /
                 ${game.i18n.localize("DX3rd.Encroach")} : ${e.system.encroach.value} /
                 ${game.i18n.localize("DX3rd.Limit")} : ${e.system.limit}
@@ -189,46 +186,44 @@ export class ComboDialog extends Dialog {
     if (!getTarget)
       Hooks.call("updateActorCost", this.actor, key, "target");
     else {
-      new Dialog({
-        title: game.i18n.localize("DX3rd.SelectTarget"),
+      new foundry.applications.api.DialogV2({
+        window: { title: game.i18n.localize("DX3rd.SelectTarget") },
+        position: { top: 300, left: 20 },
         content: `
           <h2><b>${game.i18n.localize("DX3rd.SelectTarget")}</b></h2>
         `,
-        buttons: {
-          confirm: {
-            icon: '<i class="fas fa-check"></i>',
-            label: "Confirm",
-            callback: async () => {
-              let targets = game.user.targets;
-              for (let t of targets) {
-                let a = t.actor;
+        buttons: [{
+          action: "confirm",
+          icon: "fas fa-check",
+          label: "Confirm",
+          default: true,
+          callback: async () => {
+            let targets = game.user.targets;
+            for (let t of targets) {
+              let a = t.actor;
 
-                for (let e of appliedList)
-                  await e.applyTarget(a);
+              for (let e of appliedList)
+                await e.applyTarget(a);
 
-                for (let e of macroList) {
-                  const macro = game.macros.contents.find(m => (m.name === e.system.macro));
-                  if (macro != undefined)
-                      macro.execute();
-                  else if (e.system.macro != "")
-                      new Dialog({
-                          title: "macro",
-                          content: `Do not find this macro: ${e.system.macro}`,
-                          buttons: {}
-                      }).render(true);
-                }
+              for (let e of macroList) {
+                const macro = game.macros.contents.find(m => (m.name === e.system.macro));
+                if (macro != undefined)
+                    macro.execute();
+                else if (e.system.macro != "")
+                    foundry.applications.api.DialogV2.prompt({
+                      window: { title: "macro" },
+                      content: `Do not find this macro: ${e.system.macro}`,
+                      ok: { label: "OK" }
+                    });
               }
-              Hooks.call("updateActorCost", this.actor, key, "target");
             }
+            Hooks.call("updateActorCost", this.actor, key, "target");
           }
-        },
-        close: () => {
-          //Hooks.call("updateActorCost", this.actor, key, "target")
-        }
-      }, {top: 300, left: 20}).render(true);
+        }]
+      }).render(true);
     }
-    
 
+    await this.close();
 
   }
 
@@ -236,16 +231,16 @@ export class ComboDialog extends Dialog {
   /* -------------------------------------------- */
 
   _onShowItemDetails(event) {
-    const toggler = $(event.currentTarget);
-    if ($(event.target).hasClass("active-effect") || $(event.target).hasClass("echo-item"))
+    if (event.target.classList.contains("active-effect") || event.target.classList.contains("echo-item"))
       return;
 
     event.preventDefault();
-    const item = toggler.parents('.item');
-    const description = item.find('.item-description');
+    const toggler = event.currentTarget;
+    const item = toggler.closest('.item');
+    const description = item.querySelector('.item-description');
 
-    toggler.toggleClass('open');
-    description.slideToggle();
+    toggler.classList.toggle('open');
+    description.style.display = (description.style.display === 'block') ? 'none' : 'block';
   }
 
   /* -------------------------------------------- */
