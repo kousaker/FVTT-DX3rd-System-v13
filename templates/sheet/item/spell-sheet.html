@@ -231,7 +231,15 @@
           <ol class="attributes-list">
           {{#each system.skills as |attr key|}}
             <li class="attribute flexrow" data-attribute="{{key}}">
-              <input class="attribute-key" type="text" name="system.skills.{{key}}.key" value="{{key}}" data-dtype="String">
+              {{!-- 既定技能(白兵・回避など)はキーが内部IDのため日本語名を表示し、
+                    編集はさせない。実際の値は hidden で送る。ユーザーが追加した
+                    カスタム技能だけキーを直接編集できるようにする。 --}}
+              {{#if (isBaseSkill key)}}
+                <input class="attribute-key" type="text" value="{{skillKeyLabel key}}" disabled>
+                <input type="hidden" name="system.skills.{{key}}.key" value="{{key}}">
+              {{else}}
+                <input class="attribute-key" type="text" name="system.skills.{{key}}.key" value="{{key}}" data-dtype="String">
+              {{/if}}
               <input class="attribute-key" type="text" name="system.skills.{{key}}.name" value="{{attrSkill ../system.actorSkills ../system.skills key 'name'}}" data-dtype="String">
               <select class="attribute-key" name="system.skills.{{key}}.base" data-dtype="String">
                 {{#select (attrSkill ../system.actorSkills ../system.skills key 'base')}}

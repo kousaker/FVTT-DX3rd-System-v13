@@ -12,6 +12,25 @@ export class DX3rdRegisterHelpers {
       return (arg != null && arg.indexOf('DX3rd.') != -1) ? game.i18n.localize(arg) : arg;
     });
 
+    /**
+     * 技能キーが既定技能(game.DX3rd.baseSkills 由来)かどうか。
+     * 既定技能はキー欄を日本語表示の読み取り専用にし、ユーザーが追加した
+     * カスタム技能だけキーを直接編集できるようにするために使う。
+     */
+    Handlebars.registerHelper('isBaseSkill', function(key) {
+      return key != null && key !== "-" && !!game.DX3rd?.baseSkills?.[key];
+    });
+
+    /**
+     * 技能キーの表示名。既定技能なら日本語名を返し、無ければキーをそのまま返す。
+     */
+    Handlebars.registerHelper('skillKeyLabel', function(key) {
+      const name = game.DX3rd?.baseSkills?.[key]?.name;
+      if (!name) return key;
+      return (typeof name === "string" && name.indexOf("DX3rd.") !== -1)
+        ? game.i18n.localize(name) : name;
+    });
+
     Handlebars.registerHelper('skillByKey', function(actor, key) {
       if (key == "-" || actor == null)
         return key;
