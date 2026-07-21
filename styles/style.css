@@ -1,6 +1,42 @@
+/* ============================================================================
+   V1コアCSS互換ユーティリティ(必ずファイル先頭に置くこと)
+
+   .flexrow はFoundry V1のコアCSSが提供していたユーティリティで、V1シート
+   (.window-app)にしか適用されない。ApplicationV2(.application)では効かず、
+   横並びのはずの要素が縦積みになって次の行と重なるため、自前で定義する。
+
+   【定義位置が重要】V1では コアCSS → システムCSS の順に読み込まれるため、
+   `.flexrow > * { flex: 1 }` はシステム側の `.item-controls { flex: 0 0 54px }`
+   などに必ず負けていた。この互換定義をファイル末尾に置くと、同一詳細度の
+   システム側指定を後勝ちで潰してしまい、
+     - .stat-list .divider(スラッシュ)が flex:1 になりHP等の数値欄を圧迫
+     - .item-controls / .item-addon が行幅の1/3を占有
+     - .header-fields .level が行の半分を占有
+     - .attribute-control が20px固定でなくなる
+   といった崩れを生む。必ずシステム側の指定より前に置くこと。
+   ============================================================================ */
+.dx3rd .flexrow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.dx3rd .flexrow > * {
+  flex: 1;
+}
+
+/* V1コアは ol/ul のマーカーとインデントを打ち消していた。V2では効かないため、
+   アイテム一覧に数字マーカーが出るのを防ぐ。 */
+.dx3rd .items-list,
+.dx3rd .attributes-list {
+  list-style: none;
+}
 
 .dx3rd {
-  
+
 }
 
 .dx3rd .highlight {
@@ -774,22 +810,7 @@
   border: none;
 }
 
-/* .flexrow はFoundry V1のコアCSSが提供していたユーティリティで、V1シート
-   (.window-app)にしか適用されない。ApplicationV2(.application)では効かず、
-   横並びのはずの要素が縦積みになって次の行と重なるため、自前で定義する。
-   V1の挙動(display:flex + 直下の子は flex:1)をそのまま再現している。 */
-.dx3rd .flexrow {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.dx3rd .flexrow > * {
-  flex: 1;
-}
+/* .flexrow の定義はファイル先頭へ移動した(読み込み順の理由はそちらのコメント参照)。 */
 
 .dx3rd .tabs .item {
   border: 1px solid;
