@@ -973,7 +973,9 @@
 .dx3rd .item .sheet-header {
   width: 100%;
   margin-bottom: 10px;
-  height: 64px;
+  /* 縦フレックスになったルート要素の中で潰れないよう固定値ではなく下限で扱う。 */
+  min-height: 64px;
+  flex: 0 0 auto;
 }
 
 .dx3rd .item .sheet-header {
@@ -1061,6 +1063,9 @@
   border: none;
   color: black;
   width: 32px;
+  /* 汎用の `margin: 0 10px` のままだと 50px 枠から溢れるため中央寄せに。 */
+  margin: 0 auto;
+  display: block;
 }
 
 
