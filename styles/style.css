@@ -1568,3 +1568,15 @@
   color: #000;
   cursor: default;
 }
+
+/* --- チェックボックス添えラベルが縦に潰れる ---
+   エフェクト/コンボの紹介タブにある「経験点」が幅26pxで3行(高さ52px)に
+   折り返していた。原因は本ファイル冒頭の互換定義 .flexrow > * { flex: 1 }。
+   .checkbox-addon は「ラベル＋チェックボックス」の小さな塊で、ラベルまで
+   均等配分されると文字幅を割り込む。ラベルは内容幅で固定し、余りは
+   チェックボックス側へ渡す。実測: 26px/52px → 42px/17px。 */
+.dx3rd .checkbox-addon > span,
+.dx3rd .checkbox-addon > label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
