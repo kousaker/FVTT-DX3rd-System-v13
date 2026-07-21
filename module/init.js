@@ -394,11 +394,11 @@ async function chatListeners(html) {
       scope.item = item;
       await macro.execute(scope);
     } else if (macroName !== "")
-      new Dialog({
-        title: "macro",
+      new foundry.applications.api.DialogV2({
+        window: { title: "macro" },
         content: `Do not find this macro: ${macroName}`,
-        buttons: {},
-      }).render(true);
+        buttons: [{ action: "ok", label: "OK", default: true }],
+      }).render({ force: true });
   }
 
   async function targeting(targets, actor) {
@@ -413,14 +413,16 @@ async function chatListeners(html) {
     await ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: actor }),
       content: message,
-      type: CONST.CHAT_MESSAGE_TYPES.IC,
+      style: CONST.CHAT_MESSAGE_STYLES.IC,
     });
   }
 
   // 채팅창에 호출된 effect 아이템의 사용 버튼을 누를 경우 실행되는 기능 구현 //
-  html.on("click", ".use-effect", async (ev) => {
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".use-effect");
+    if (!currentTarget) return;
     ev.preventDefault();
-    const itemInfo = ev.currentTarget.closest(".dx3rd-item-info");
+    const itemInfo = currentTarget.closest(".dx3rd-item-info");
     const actor = game.actors.get(itemInfo.dataset.actorId);
     const item = actor.items.get(itemInfo.dataset.itemId);
 
@@ -524,8 +526,8 @@ async function chatListeners(html) {
       .filter(target => target.actor?.system.conditions.stealth?.active)
       .map(target => target.actor?.name);
 
-      new Dialog({
-        title: game.i18n.localize("DX3rd.StealthTargetCheck"),
+      foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("DX3rd.StealthTargetCheck") },
         content: `
           <p>${game.i18n.localize("DX3rd.StealthCharacter")}:</p>
           <ul>
@@ -533,28 +535,28 @@ async function chatListeners(html) {
           </ul>
           <hr>
         `,
-        buttons: {
-          confirm: {
-            icon: '<i class="fas fa-check"></i>',
-            label: `Confirm`,
-            callback: () => runAction()
-          },
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
-            label: `Cancel`
-          }
+        yes: {
+          icon: '<i class="fas fa-check"></i>',
+          label: `Confirm`,
+          callback: () => runAction()
         },
-        default: "cancel"
-      }).render(true);
+        no: {
+          icon: '<i class="fas fa-times"></i>',
+          label: `Cancel`
+        },
+        defaultYes: false
+      });
     } else {
       runAction()
     }
   });
 
   // 채팅창에 호출된 combo 아이템의 사용 버튼을 누를 경우 실행되는 기능 구현 //
-  html.on("click", ".use-combo", async (ev) => {
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".use-combo");
+    if (!currentTarget) return;
     ev.preventDefault();
-    const itemInfo = ev.currentTarget.closest(".dx3rd-item-info");
+    const itemInfo = currentTarget.closest(".dx3rd-item-info");
     const actor = game.actors.get(itemInfo.dataset.actorId);
     const item = actor.items.get(itemInfo.dataset.itemId);
 
@@ -689,8 +691,8 @@ async function chatListeners(html) {
       .filter(target => target.actor?.system.conditions.stealth?.active)
       .map(target => target.actor?.name);
 
-      new Dialog({
-        title: game.i18n.localize("DX3rd.StealthTargetCheck"),
+      foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("DX3rd.StealthTargetCheck") },
         content: `
           <p>${game.i18n.localize("DX3rd.StealthCharacter")}:</p>
           <ul>
@@ -698,28 +700,28 @@ async function chatListeners(html) {
           </ul>
           <hr>
         `,
-        buttons: {
-          confirm: {
-            icon: '<i class="fas fa-check"></i>',
-            label: `Confirm`,
-            callback: () => runAction()
-          },
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
-            label: `Cancel`
-          }
+        yes: {
+          icon: '<i class="fas fa-check"></i>',
+          label: `Confirm`,
+          callback: () => runAction()
         },
-        default: "cancel"
-      }).render(true);
+        no: {
+          icon: '<i class="fas fa-times"></i>',
+          label: `Cancel`
+        },
+        defaultYes: false
+      });
     } else {
       runAction()
     }
   });
 
   // 채팅창에 호출된 spell 아이템의 사용 버튼을 누를 경우 실행되는 기능 구현 //
-  html.on("click", ".use-spell", async (ev) => {
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".use-spell");
+    if (!currentTarget) return;
     ev.preventDefault();
-    const itemInfo = ev.currentTarget.closest(".dx3rd-item-info");
+    const itemInfo = currentTarget.closest(".dx3rd-item-info");
     const actor = game.actors.get(itemInfo.dataset.actorId);
     const item = actor.items.get(itemInfo.dataset.itemId);
 
@@ -776,8 +778,8 @@ async function chatListeners(html) {
         .filter(target => target.actor?.system.conditions.stealth?.active)
         .map(target => target.actor?.name);
 
-      new Dialog({
-        title: game.i18n.localize("DX3rd.StealthTargetCheck"),
+      foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("DX3rd.StealthTargetCheck") },
         content: `
       <p>${game.i18n.localize("DX3rd.StealthCharacter")}:</p>
       <ul>
@@ -785,28 +787,28 @@ async function chatListeners(html) {
       </ul>
       <hr>
     `,
-        buttons: {
-          confirm: {
-            icon: '<i class="fas fa-check"></i>',
-            label: `Confirm`,
-            callback: () => runAction()
-          },
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
-            label: `Cancel`
-          }
+        yes: {
+          icon: '<i class="fas fa-check"></i>',
+          label: `Confirm`,
+          callback: () => runAction()
         },
-        default: "cancel"
-      }).render(true);
+        no: {
+          icon: '<i class="fas fa-times"></i>',
+          label: `Cancel`
+        },
+        defaultYes: false
+      });
     } else {
       runAction()
     }
   });
 
   // 채팅창에 호출된 psionic 아이템의 사용 버튼을 누를 경우 실행되는 기능 구현 //
-  html.on("click", ".use-psionic", async (ev) => {
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".use-psionic");
+    if (!currentTarget) return;
     ev.preventDefault();
-    const itemInfo = ev.currentTarget.closest(".dx3rd-item-info");
+    const itemInfo = currentTarget.closest(".dx3rd-item-info");
     const actor = game.actors.get(itemInfo.dataset.actorId);
     const item = actor.items.get(itemInfo.dataset.itemId);
 
@@ -839,7 +841,7 @@ async function chatListeners(html) {
       hp = Number(hp);
     else {
       let roll = new Roll(hp);
-      await roll.roll({ async: true });
+      await roll.evaluate();
 
       let rollData = await roll.render();
       let chatData = {
@@ -852,10 +854,10 @@ async function chatListeners(html) {
           ${rollData}
         </div>
       `;
-      chatData.type = CONST.CHAT_MESSAGE_TYPES.ROLL;
+      chatData.rolls = [roll];
       chatData.sound = CONFIG.sounds.dice;
       chatData.roll = roll;
-      
+
       let rollMode = game.settings.get("core", "rollMode");
       ChatMessage.create(chatData, { rollMode });
 
@@ -939,8 +941,8 @@ async function chatListeners(html) {
         .filter(target => target.actor?.system.conditions.stealth?.active)
         .map(target => target.actor?.name);
 
-      new Dialog({
-        title: game.i18n.localize("DX3rd.StealthTargetCheck"),
+      foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("DX3rd.StealthTargetCheck") },
         content: `
       <p>${game.i18n.localize("DX3rd.StealthCharacter")}:</p>
       <ul>
@@ -948,25 +950,25 @@ async function chatListeners(html) {
       </ul>
       <hr>
     `,
-        buttons: {
-          confirm: {
-            icon: '<i class="fas fa-check"></i>',
-            label: `Confirm`,
-            callback: () => runAction()
-          },
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
-            label: `Cancel`
-          }
+        yes: {
+          icon: '<i class="fas fa-check"></i>',
+          label: `Confirm`,
+          callback: () => runAction()
         },
-        default: "cancel"
-      }).render(true);
+        no: {
+          icon: '<i class="fas fa-times"></i>',
+          label: `Cancel`
+        },
+        defaultYes: false
+      });
     } else {
       runAction()
     }
   });
 
-  html.on("click", ".roll-attack", async (ev) => {
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".roll-attack");
+    if (!currentTarget) return;
     // 현재 선택된 타겟들 가져오기
     const targets = Array.from(game.user.targets || []);
     if(targets.length < 1) {
@@ -974,9 +976,9 @@ async function chatListeners(html) {
       return;
     }
 
-    const runAction = async () => { 
+    const runAction = async () => {
       ev.preventDefault();
-      const itemInfo = ev.currentTarget.closest(".dx3rd-item-info");
+      const itemInfo = currentTarget.closest(".dx3rd-item-info");
       const actor = game.actors.get(itemInfo.dataset.actorId);
       const item = actor.items.get(itemInfo.dataset.itemId);
   
@@ -1019,8 +1021,8 @@ async function chatListeners(html) {
         .filter(target => target.actor?.system.conditions.stealth?.active)
         .map(target => target.actor?.name);
 
-      new Dialog({
-        title: game.i18n.localize("DX3rd.StealthTargetCheck"),
+      foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("DX3rd.StealthTargetCheck") },
         content: `
       <p>${game.i18n.localize("DX3rd.StealthCharacter")}:</p>
       <ul>
@@ -1028,27 +1030,27 @@ async function chatListeners(html) {
       </ul>
       <hr>
     `,
-        buttons: {
-          confirm: {
-            icon: '<i class="fas fa-check"></i>',
-            label: `Confirm`,
-            callback: () => runAction()
-          },
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
-            label: `Cancel`
-          }
+        yes: {
+          icon: '<i class="fas fa-check"></i>',
+          label: `Confirm`,
+          callback: () => runAction()
         },
-        default: "cancel"
-      }).render(true);
+        no: {
+          icon: '<i class="fas fa-times"></i>',
+          label: `Cancel`
+        },
+        defaultYes: false
+      });
     } else {
       runAction()
     }
   });
 
-  html.on("click", ".calc-damage", async (ev) => {
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".calc-damage");
+    if (!currentTarget) return;
     ev.preventDefault();
-    const data = ev.currentTarget.dataset;
+    const data = currentTarget.dataset;
 
     const actorId = data.actorid;
     const actor = game.actors.get(actorId);
@@ -1062,7 +1064,7 @@ async function chatListeners(html) {
     const appendDamageRoll = damage + fear + sublimation_damage;
 
     const rollResult = Number(
-      $(ev.currentTarget).parent().find(".dice-total").first().text()
+      currentTarget.parentElement.querySelector(".dice-total")?.textContent
     );
 
     let content = `
@@ -1097,32 +1099,32 @@ async function chatListeners(html) {
           `
     }
 
-    new Dialog({
-      title: game.i18n.localize("DX3rd.CalcDamage"),
+    new foundry.applications.api.DialogV2({
+      window: { title: game.i18n.localize("DX3rd.CalcDamage") },
       content: content,
-      buttons: {
-        confirm: {
+      buttons: [
+        {
+          action: "confirm",
           icon: '<i class="fas fa-check"></i>',
           label: "Confirm",
-          callback: async () => {
-            let ignoreArmor = $("#ignore-armor").is(":checked");
-            let addResult =
-              $("#add-result").val() != "" ? Number($("#add-result").val()) : 0;
-            let addDamage =
-              $("#add-damage").val() != "" ? Number($("#add-damage").val()) : 0;
-            let addDice =
-              $("#add-dice").val() != "" ? Number($("#add-dice").val()) : 0;
+          default: true,
+          callback: async (event, button, dialog) => {
+            let ignoreArmor = dialog.element.querySelector("#ignore-armor").checked;
+            let addResult = Number(dialog.element.querySelector("#add-result").value || 0);
+            let addDamage = Number(dialog.element.querySelector("#add-damage").value || 0);
+            let addDice = Number(dialog.element.querySelector("#add-dice").value || 0);
             let formula = `${
               parseInt((rollResult + addResult) / 10) + 1 + appendDamageRoll + addDice
             }d10 + ${attack + addDamage}`;
-            if ($("#tourture").is(":checked")) {
+            const tourtureCheckbox = dialog.element.querySelector("#tourture");
+            if (tourtureCheckbox?.checked) {
               formula = `${
                 parseInt((rollResult + addResult) / 10) + 1 + appendDamageRoll + addDice
               }d10 + ${attack + addDamage - 20}`;
             }
 
             let roll = new Roll(formula);
-            await roll.roll({ async: true });
+            await roll.evaluate();
 
             let rollMode = game.settings.get("core", "rollMode");
             let rollData = await roll.render();
@@ -1143,7 +1145,7 @@ async function chatListeners(html) {
             ChatMessage.create(
               {
                 content: content,
-                type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+                rolls: [roll],
                 sound: CONFIG.sounds.dice,
                 roll: roll,
               },
@@ -1154,14 +1156,16 @@ async function chatListeners(html) {
             });
           },
         },
-      },
+      ],
       default: "confirm",
-    }).render(true);
+    }).render({ force: true });
   });
 
-  html.on("click", ".apply-damage", async (ev) => {
-    event.preventDefault();
-    const dataset = ev.currentTarget.dataset;
+  html.addEventListener("click", async (ev) => {
+    const currentTarget = ev.target.closest(".apply-damage");
+    if (!currentTarget) return;
+    ev.preventDefault();
+    const dataset = currentTarget.dataset;
     const damage = Number(dataset.damage);
     const ignoreArmor = dataset.ignoreArmor == "true";
     const data = { ignoreArmor: ignoreArmor };
