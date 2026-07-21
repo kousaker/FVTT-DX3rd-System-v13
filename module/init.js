@@ -33,8 +33,8 @@ Hooks.once("init", async function () {
   // 새로운 상태이상 추가
   CONFIG.statusEffects.push({
     id: "berserk",
-    label: game.i18n.localize("DX3rd.Berserk"),
-    icon: "icons/svg/pawprint.svg",
+    name: game.i18n.localize("DX3rd.Berserk"),
+    img: "icons/svg/pawprint.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "berserk" } },
@@ -43,8 +43,8 @@ Hooks.once("init", async function () {
 
   CONFIG.statusEffects.push({
     id: "riger",
-    label: game.i18n.localize("DX3rd.Riger"),
-    icon: "icons/svg/lightning.svg",
+    name: game.i18n.localize("DX3rd.Riger"),
+    img: "icons/svg/lightning.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "riger" } }
@@ -52,8 +52,8 @@ Hooks.once("init", async function () {
 
   CONFIG.statusEffects.push({
     id: "pressure",
-    label: game.i18n.localize("DX3rd.Pressure"),
-    icon: "icons/svg/net.svg",
+    name: game.i18n.localize("DX3rd.Pressure"),
+    img: "icons/svg/net.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "pressure" } }
@@ -61,8 +61,8 @@ Hooks.once("init", async function () {
 
   CONFIG.statusEffects.push({
     id: "dazed",
-    label: game.i18n.localize("DX3rd.Dazed"),
-    icon: "icons/svg/daze.svg",
+    name: game.i18n.localize("DX3rd.Dazed"),
+    img: "icons/svg/daze.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "dazed" } }
@@ -70,8 +70,8 @@ Hooks.once("init", async function () {
 
   CONFIG.statusEffects.push({
     id: "tainted",
-    label: game.i18n.localize("DX3rd.Tainted"),
-    icon: "icons/svg/acid.svg",
+    name: game.i18n.localize("DX3rd.Tainted"),
+    img: "icons/svg/acid.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "tainted" } }
@@ -79,8 +79,8 @@ Hooks.once("init", async function () {
 
   CONFIG.statusEffects.push({
     id: "hatred",
-    label: game.i18n.localize("DX3rd.Hatred"),
-    icon: "icons/svg/fire.svg",
+    name: game.i18n.localize("DX3rd.Hatred"),
+    img: "icons/svg/fire.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "hatred" } }
@@ -88,8 +88,8 @@ Hooks.once("init", async function () {
 
   CONFIG.statusEffects.push({
     id: "fear",
-    label: game.i18n.localize("DX3rd.Fear"),
-    icon: "icons/svg/stoned.svg",
+    name: game.i18n.localize("DX3rd.Fear"),
+    img: "icons/svg/stoned.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "fear" } }
@@ -97,8 +97,8 @@ Hooks.once("init", async function () {
 
   CONFIG.statusEffects.push({
     id: "fly",
-    label: game.i18n.localize("DX3rd.Fly"),
-    icon: "icons/svg/wing.svg",
+    name: game.i18n.localize("DX3rd.Fly"),
+    img: "icons/svg/wing.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "fly" } }
@@ -106,8 +106,8 @@ Hooks.once("init", async function () {
 
   CONFIG.statusEffects.push({
     id: "stealth",
-    label: game.i18n.localize("DX3rd.Stealth"),
-    icon: "icons/svg/blind.svg",
+    name: game.i18n.localize("DX3rd.Stealth"),
+    img: "icons/svg/blind.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "stealth" } }
@@ -115,8 +115,8 @@ Hooks.once("init", async function () {
 
   CONFIG.statusEffects.push({
     id: "boarding",
-    label: game.i18n.localize("DX3rd.Boarding"),
-    icon: "icons/svg/target.svg",
+    name: game.i18n.localize("DX3rd.Boarding"),
+    img: "icons/svg/target.svg",
     disabled: false,
     duration: { rounds: 9999 },
     flags: { "dx3rd": { statusId: "boarding" } }
