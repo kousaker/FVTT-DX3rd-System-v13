@@ -256,12 +256,15 @@
 .dx3rd .sheet-wrapper .sheet-header {
   width: 100%;
   margin-bottom: 10px;
-  height: 44px;
+  /* 高さ固定だと中身がはみ出したときに切れるので下限のみ指定 */
+  min-height: 44px;
+  flex: 0 0 auto;
   background: #2d2d2d;
   color: #fff;
 
   display: grid;
   grid-template-columns: repeat(16, minmax(0, 1fr));
+  align-items: center;
   gap: 0px 10px;
   padding: 0;
 }
@@ -272,6 +275,11 @@
   font-weight: bold;
   text-align: center;
   margin: 8px;
+  /* 列幅(3/16)を超えて隣の侵食率バーへせり出さないようにする */
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .dx3rd .sheet-wrapper .sheet-header .select-box option {
@@ -300,9 +308,32 @@
   cursor: pointer;
 }
 
+/* ============================================================================
+   侵食率バー
+
+   .dice-addon(ダイス/上昇値の表示)はバーへ重ねる意図の絶対配置だが、
+   縦位置(top/bottom)が未指定で静的位置任せ、かつ背景も未指定だったため、
+   ApplicationV2 既定の暗い input 背景が「黒い小箱」として浮き、
+   左隣の select や下のバーと衝突して見えていた。
+   重ね表示という設計はそのままに、縦中央へ固定し、背景は透過、
+   下のバーの操作を邪魔しないよう pointer-events も切る。
+   ============================================================================ */
 .dx3rd .sheet-wrapper .sheet-header .progress-bar {
   text-align: center;
   position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* バー本体。V2既定の input 幅に頼らず、残り幅いっぱいに伸ばす。 */
+.dx3rd .sheet-wrapper .sheet-header .progress-bar > input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  box-sizing: border-box;
+  height: 28px;
+  text-align: center;
 }
 
 .dx3rd .sheet-wrapper .sheet-header .progress-bar input {
@@ -311,16 +342,43 @@
   border: 2px solid white;
 }
 
-.dx3rd .sheet-wrapper .sheet-header .progress-bar .dice-addon label {
-  margin-right: 6px;
+.dx3rd .sheet-wrapper .sheet-header .progress-bar .dice-addon {
+  position: absolute;
+  left: 8px;
+  right: auto;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  max-width: calc(100% - 16px);
+  /* 中身は全て disabled の表示専用。下のバーのクリックを妨げない。 */
+  pointer-events: none;
 }
 
-/* 侵食率バーへ重ねる表示なので背景は透過。白文字は .progress-bar input で指定済み。 */
+.dx3rd .sheet-wrapper .sheet-header .progress-bar .dice-addon label {
+  flex: 0 0 auto;
+  margin-right: 2px;
+  color: #fff;
+}
+
+/* 侵食率バーへ重ねる表示なので背景は透過。 */
 .dx3rd .sheet-wrapper .sheet-header .progress-bar .dice-addon input {
+  flex: 0 0 auto;
   margin: 0;
-  width: 20px;
+  width: 2.4em;
+  min-width: 0;
+  height: auto;
   border: 0;
   background: transparent;
+  color: #fff;
+  text-align: center;
+}
+
+.dx3rd .sheet-wrapper .sheet-header .progress-bar .dice-addon .slash {
+  flex: 0 0 auto;
+  margin: 0 4px;
+  padding-top: 0;
   color: #fff;
 }
 
@@ -509,26 +567,71 @@
   width: 28px;
   height: 25px;
   background: white;
+  color: black;
+  text-align: center;
   right: 10px;
   top: 4px;
+  box-sizing: border-box;
 }
 
 .dx3rd .sheet-wrapper .flex {
   display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* V2既定の input 幅 + min-width:auto のままだと縮まず、セル幅を超えて
+   隣のセルへせり出す(侵食率初期値の欄など)。等分割にして収める。 */
+.dx3rd .sheet-wrapper .flex > input,
+.dx3rd .sheet-wrapper .flex > select {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .dx3rd .sheet-wrapper .slash {
+  flex: 0 0 auto;
   padding-top: 4px;
   margin: 0 10px;
   font-weight: bold;
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   ダイス欄(メジャー / DX / +)
+
+   input は flex の指定が無く、ApplicationV2 既定の幅と min-width:auto の
+   ために縮まず、行全体が .grid-4 のセル幅(約289px)を超えて右隣の
+   経験点・常備化Pのボックスへせり出して重なっていた。
+   セル幅に収まるよう等分割し、区切り文字だけ固有幅にする。
+   ============================================================================ */
+.dx3rd .sheet-wrapper .sheet-stat .dice-info .flex {
+  justify-content: center;
+  gap: 4px;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .dice-info .flex input {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  box-sizing: border-box;
   background: white;
+  color: black;
+  text-align: center;
+}
+
+.dx3rd .sheet-wrapper .sheet-stat .dice-info .flex .slash {
+  margin: 0;
+  padding-top: 0;
 }
 
 .dx3rd .sheet-wrapper .sheet-stat .dice-info .flex select {
-  margin-right: 8px;
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 0;
+  box-sizing: border-box;
+  margin-right: 0;
   border: none;
   font-weight: bold;
   background: black;
