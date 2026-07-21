@@ -44,17 +44,15 @@
       <tr>
         <th>{{localize "DX3rd.Covering2"}}</th>
         <td colspan="3"><input type="checkbox" id="double" {{double}} ></td>
-        <td style="text-align: right;"><button id="reset" style="width: 32px; margin: 0 5px"><i class="fas fa-redo"></i></button></td>
+        <td style="text-align: right;"><button type="button" id="reset" data-action="reset" style="width: 32px; margin: 0 5px"><i class="fas fa-redo"></i></button></td>
       </tr>
 
     </table>
 
 </div>
 <div class="dialog-buttons">
-    {{#each buttons as |button id|}}
-    <button class="dialog-button" data-button="{{id}}">
-        {{{button.icon}}}
-        {{{button.label}}}
+    <button type="button" class="dialog-button" data-action="confirm">
+        <i class="fas fa-check"></i>
+        Confirm
     </button>
-    {{/each}}
 </div>

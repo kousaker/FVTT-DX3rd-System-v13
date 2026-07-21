@@ -43,10 +43,9 @@
 
 </div>
 <div class="dialog-buttons">
-    {{#each buttons as |button id|}}
-    <button class="dialog-button" data-button="{{id}}">
-        {{{button.icon}}}
-        {{{button.label}}}
+    {{#ifEquals option "create"}}
+    <button type="button" class="dialog-button" data-action="create">
+        Create
     </button>
-    {{/each}}
+    {{/ifEquals}}
 </div>
