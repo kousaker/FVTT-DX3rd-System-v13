@@ -585,8 +585,8 @@ export class DX3rdActor extends Actor {
     let skillsOriginal = attributes.skills;
 
     for (let c of combos) {
-      let values = duplicate(valuesOriginal);
-      let skills = duplicate(skillsOriginal);
+      let values = foundry.utils.deepClone(valuesOriginal);
+      let skills = foundry.utils.deepClone(skillsOriginal);
       let critical_min = attributes.critical.min;
 
       let comboData = c.system;
