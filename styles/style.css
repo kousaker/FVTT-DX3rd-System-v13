@@ -79,23 +79,26 @@
   text-align: center;
 }
 
+/* ApplicationV2ではPARTSが .window-content 内へ描画される。
+   V1時代の flex-wrap:wrap + justify-content:space-between のままだと、
+   収まらない内容(タブnavとsheet-body)が2列目へ折り返されて画面外に消え、
+   さらに要素間に巨大な余白が生まれるため、いずれも無効化する。 */
 .dx3rd .sheet-wrapper {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-  -ms-flex-direction: column;
   flex-direction: column;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
+  flex-wrap: nowrap;
   align-items: stretch;
-  -webkit-box-pack: justify;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+  justify-content: flex-start;
   height: 100%;
+  min-height: 0;
+}
+
+/* 残り高さをタブ本文が占め、あふれた分はここでスクロールさせる。
+   min-height:0 が無いとflexアイテムが縮まずスクロールが効かない。 */
+.dx3rd .sheet-wrapper .sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .dx3rd .sheet-wrapper .sheet-header {

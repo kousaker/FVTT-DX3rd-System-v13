@@ -13,7 +13,6 @@
   "DX3rd.Mind": "Mind",
   "DX3rd.Social": "Social",
   "DX3rd.Skills": "Skills",
-
   "DX3rd.melee": "melee",
   "DX3rd.dodge": "dodge",
   "DX3rd.ride": "ride",
@@ -26,7 +25,6 @@
   "DX3rd.negotiation": "negotiation",
   "DX3rd.procure": "procure",
   "DX3rd.info": "info",
-
   "DX3rd.SubStatus": "SubStatus",
   "DX3rd.Attack": "Atk.Power",
   "DX3rd.Guard": "Guard",
@@ -38,25 +36,21 @@
   "DX3rd.EXP": "EXP",
   "DX3rd.EXPInit": "BaseEXP",
   "DX3rd.EXPAppend": "GameEXP",
-
   "DX3rd.Description": "Description",
   "DX3rd.Combo": "Combo",
   "DX3rd.Rois": "Lois",
   "DX3rd.Equipment": "Equipment",
   "DX3rd.Applied": "Applied",
-
   "DX3rd.CreateWorks": "CreateWorks",
   "DX3rd.CreateSyndrome": "CreateSyndrome",
   "DX3rd.PureBreed": "PureBreed",
   "DX3rd.CrossBreed": "CrossBreed",
   "DX3rd.TriBreed": "TriBreed",
-
   "DX3rd.Key": "Key",
   "DX3rd.Name": "Name",
   "DX3rd.Value": "Value",
   "DX3rd.Add": "Add",
   "DX3rd.Base": "Base",
-
   "DX3rd.Cover": "Cover",
   "DX3rd.Ancestry": "Origin",
   "DX3rd.Experience": "Experience",
@@ -64,7 +58,6 @@
   "DX3rd.Awaken": "Awaken",
   "DX3rd.Impulse": "Impulse",
   "DX3rd.Desire": "Desire",
-
   "DX3rd.Skill": "Skill",
   "DX3rd.Difficulty": "Difficulty",
   "DX3rd.Limit": "Restrict",
@@ -73,7 +66,6 @@
   "DX3rd.Range": "Range",
   "DX3rd.Target": "Target",
   "DX3rd.Encroach": "Encroach",
-
   "DX3rd.Text": "Refer",
   "DX3rd.Minor": "Minor",
   "DX3rd.Major": "Major",
@@ -84,7 +76,6 @@
   "DX3rd.Initiative": "Initiative",
   "DX3rd.Always": "Constant",
   "DX3rd.Easy": "Simple",
-
   "DX3rd.Attributes": "Attributes",
   "DX3rd.Critical": "Critical",
   "DX3rd.CriticalMin": "CriticalMin",
@@ -108,10 +99,8 @@
   "DX3rd.SocialValue": "SocialValue",
   "DX3rd.SocialAdd": "SocialAdd",
   "DX3rd.SocialDice": "SocialDice",
-
   "DX3rd.CreateSkill": "CreateSkill",
   "DX3rd.EditSkill": "EditSkill",
-
   "DX3rd.Macro": "Macro",
   "DX3rd.Active": "Active",
   "DX3rd.DisableTiming": "DisableTiming",
@@ -125,11 +114,8 @@
   "DX3rd.AfterRound": "AfterRound",
   "DX3rd.AfterScene": "AfterScene",
   "DX3rd.AfterSession": "AfterSession",
-
-  "DX3rd.Target": "Target",
   "DX3rd.EquipType": "EquipType",
   "DX3rd.SellSaving": "Procure/Stock",
-
   "DX3rd.Weapon": "Weapon",
   "DX3rd.Protect": "Armour",
   "DX3rd.Vehicle": "Vehicle",
@@ -138,7 +124,6 @@
   "DX3rd.Etc": "Other",
   "DX3rd.Once": "Consumable",
   "DX3rd.Quantity": "Quantity",
-
   "DX3rd.Type": "Type",
   "DX3rd.Memory": "Lasting",
   "DX3rd.Descripted": "Trait",
@@ -151,17 +136,14 @@
   "DX3rd.Actor": "Actor",
   "DX3rd.DamageRoll": "DamageRoll",
   "DX3rd.WeaponSelect": "WeaponSelect",
-
   "DX3rd.RollType": "RollType",
   "DX3rd.AttackRoll": "AttackRoll",
   "DX3rd.DodgeRoll": "DodgeRoll",
   "DX3rd.DodgeDice": "DodgeDice",
   "DX3rd.DodgeAdd": "DodgeAdd",
-
   "DX3rd.Melee": "Melee",
   "DX3rd.Ranged": "Ranged",
   "DX3rd.Engage": "Engagement",
-
   "DX3rd.DamageApply": "DamageApply",
   "DX3rd.Use": "Use",
   "DX3rd.Roll": "Roll",
@@ -175,7 +157,6 @@
   "DX3rd.IgnoreArmor": "IgnoreArmor",
   "DX3rd.ReduceDamage": "ReduceDamage",
   "DX3rd.Covering2": "Cover",
-
   "DX3rd.EncroachmentCore": "EncroachmentCore",
   "DX3rd.EncroachmentEA": "EncroachmentEA",
   "DX3rd.EncroachmentOrigin": "EncroachmentOrigin",
@@ -188,10 +169,23 @@
   "DX3rd.EnterSceneQuestion": "EnterScene?",
   "DX3rd.EnterScene": "Appear",
   "DX3rd.Stock": "Saving",
-
   "DX3rd.SubAction1": "+10 Dice Bonus for one Check",
   "DX3rd.SubAction2": "+1D Bonus to one Check’s Score",
   "DX3rd.SubAction3": "-1 Critical Value for a Check",
   "DX3rd.SubAction4": "Recover from Incapacitation",
-  "DX3rd.SubAction5": "Remove Disadvantageous Effects"
+  "DX3rd.SubAction5": "Remove Disadvantageous Effects",
+  "TYPES.Actor.character": "Character",
+  "TYPES.Item.effect": "Powers",
+  "TYPES.Item.combo": "Combo",
+  "TYPES.Item.weapon": "Weapon",
+  "TYPES.Item.protect": "Armour",
+  "TYPES.Item.vehicle": "Vehicle",
+  "TYPES.Item.connection": "Connection",
+  "TYPES.Item.item": "Miscellaneous",
+  "TYPES.Item.works": "Works",
+  "TYPES.Item.syndrome": "Syndrome",
+  "TYPES.Item.rois": "Lois",
+  "TYPES.Item.record": "Record",
+  "TYPES.Item.spell": "Spell",
+  "TYPES.Item.psionic": "Psionics"
 }

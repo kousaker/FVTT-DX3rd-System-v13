@@ -13,7 +13,6 @@
   "DX3rd.Mind": "정신",
   "DX3rd.Social": "사회",
   "DX3rd.Skills": "기능치",
-
   "DX3rd.melee": "백병",
   "DX3rd.dodge": "회피",
   "DX3rd.ride": "운전",
@@ -27,7 +26,6 @@
   "DX3rd.negotiation": "교섭",
   "DX3rd.procure": "조달",
   "DX3rd.info": "정보",
-
   "DX3rd.SubStatus": "부능력치",
   "DX3rd.Attack": "공격력",
   "DX3rd.Guard": "가드",
@@ -40,25 +38,21 @@
   "DX3rd.EXP": "경험점",
   "DX3rd.EXPInit": "초기 경험점",
   "DX3rd.EXPAppend": "획득 경험점",
-
   "DX3rd.Description": "소개",
   "DX3rd.Combo": "콤보",
   "DX3rd.Rois": "로이스",
   "DX3rd.Equipment": "장비",
   "DX3rd.Applied": "효과",
-
   "DX3rd.CreateWorks": "워크스 생성",
   "DX3rd.CreateSyndrome": "신드롬 생성",
   "DX3rd.PureBreed": "퓨어 브리드",
   "DX3rd.CrossBreed": "크로스 브리드",
   "DX3rd.TriBreed": "트라이 브리드",
-
   "DX3rd.Key": "키",
   "DX3rd.Name": "이름",
   "DX3rd.Value": "값",
   "DX3rd.Add": "수정치",
   "DX3rd.Base": "능력치",
-
   "DX3rd.Cover": "커버",
   "DX3rd.Ancestry": "출신",
   "DX3rd.Experience": "경험",
@@ -66,7 +60,6 @@
   "DX3rd.Awaken": "각성",
   "DX3rd.Impulse": "충동",
   "DX3rd.Desire": "욕망",
-
   "DX3rd.Skill": "기능",
   "DX3rd.Difficulty": "난이도",
   "DX3rd.Limit": "제한",
@@ -75,7 +68,6 @@
   "DX3rd.Range": "사정거리",
   "DX3rd.Target": "대상",
   "DX3rd.Encroach": "침식치",
-
   "DX3rd.Text": "효과 참조",
   "DX3rd.Minor": "마이너",
   "DX3rd.Major": "메이저",
@@ -87,7 +79,6 @@
   "DX3rd.Always": "상시",
   "DX3rd.Easy": "이지",
   "DX3rd.ExtraData": "기타",
-
   "DX3rd.Attributes": "효과",
   "DX3rd.Critical": "크리티컬",
   "DX3rd.CriticalMin": "크리티컬 하한치",
@@ -111,10 +102,8 @@
   "DX3rd.SocialValue": "사회 수정치",
   "DX3rd.SocialAdd": "사회 달성치",
   "DX3rd.SocialDice": "사회 다이스",
-
   "DX3rd.CreateSkill": "기능치 생성",
   "DX3rd.EditSkill": "기능치 수정",
-
   "DX3rd.Macro": "매크로",
   "DX3rd.Active": "활성화",
   "DX3rd.DisableTiming": "비활성화",
@@ -129,11 +118,8 @@
   "DX3rd.AfterRound": "라운드 종료 이후",
   "DX3rd.AfterScene": "씬 종료 이후",
   "DX3rd.AfterSession": "세션 종료 이후",
-
   "DX3rd.Special": "특수",
-
   "DX3rd.Psionics": "사이오닉",
-
   "DX3rd.Spell": "술식",
   "DX3rd.SpellType": "종별",
   "DX3rd.Invoke": "발동치",
@@ -154,20 +140,15 @@
   "DX3rd.CastingAdd": "마술 수정",
   "DX3rd.Eibon": "에이본의 금주법",
   "DX3rd.Angel": "수호천사의 소환",
-
   "DX3rd.SpellResult": "마술 굴림 결과",
   "DX3rd.OverflowDice": "폭주 주사위",
-
   "DX3rd.SpellDisaster": "마술 폭주 발생",
   "DX3rd.SpellCalamity": "마술 대폭주 발생",
   "DX3rd.SpellCatastrophe": "마술 재액 발생",
-
   "DX3rd.Success": "성공",
   "DX3rd.Failure": "실패",
-
   "DX3rd.EquipType": "종별",
   "DX3rd.SellSaving": "매입/상비화",
-
   "DX3rd.Weapon": "무기",
   "DX3rd.Protect": "방어구",
   "DX3rd.Vehicle": "비클",
@@ -177,7 +158,6 @@
   "DX3rd.Once": "일회용",
   "DX3rd.Book": "마도서",
   "DX3rd.Quantity": "개수",
-
   "DX3rd.Type": "종류",
   "DX3rd.Memory": "메모리",
   "DX3rd.Descripted": "D로이스",
@@ -190,17 +170,14 @@
   "DX3rd.Actor": "액터",
   "DX3rd.DamageRoll": "대미지 롤",
   "DX3rd.WeaponSelect": "무기 선택?",
-
   "DX3rd.RollType": "판정 타입",
   "DX3rd.AttackRoll": "공격",
   "DX3rd.DodgeRoll": "닷지",
   "DX3rd.DodgeDice": "닷지 다이스",
   "DX3rd.DodgeAdd": "닷지 수정치",
-
   "DX3rd.Melee": "백병",
   "DX3rd.Ranged": "사격",
   "DX3rd.Engage": "지근",
-  
   "DX3rd.DamageApply": "대미지 적용",
   "DX3rd.Use": "사용",
   "DX3rd.Roll": "롤",
@@ -214,7 +191,6 @@
   "DX3rd.IgnoreArmor": "장갑 무시",
   "DX3rd.ReduceDamage": "대미지 감소",
   "DX3rd.Covering2": "2인 커버링",
-
   "DX3rd.EncroachmentCore": "침식률(코어)",
   "DX3rd.EncroachmentEA": "침식률(EA)",
   "DX3rd.EncroachmentOrigin": "침식률(기원종)",
@@ -227,7 +203,6 @@
   "DX3rd.EnterSceneQuestion": "씬에 등장합니까?",
   "DX3rd.EnterScene": "등장",
   "DX3rd.Stock": "재산점",
-
   "DX3rd.SubAction1": "판정에 10개의 주사위 추가",
   "DX3rd.SubAction2": "판정의 달성치에 +1D10 추가",
   "DX3rd.SubAction3": "판정의 크리티컬 수치에 -1의 수정",
@@ -238,11 +213,9 @@
   "DX3rd.SubAction8": "데미지 롤에 5개의 주사위 추가",
   "DX3rd.SubAction9": "전투불능에서 완전회복",
   "DX3rd.SubAction0": "이펙트 사용 횟수 회복",
-
   "DX3rd.Condition": "상태이상",
   "DX3rd.Apply": "적용",
   "DX3rd.Clear": "해제",
-
   "DX3rd.Riger": "[경직]",
   "DX3rd.Pressure": "[중압]",
   "DX3rd.Dazed": "[방심]",
@@ -250,9 +223,7 @@
   "DX3rd.Hatred": "[증오]",
   "DX3rd.Fear": "[공포]",
   "DX3rd.Berserk": "[폭주]",
-
   "DX3rd.Normal": "통상",
-
   "DX3rd.Mutation": "변이 폭주",
   "DX3rd.UrgeRelease": "해방",
   "DX3rd.UrgeHunger": "기아",
@@ -266,22 +237,17 @@
   "DX3rd.UrgeSelfmutilation": "자학",
   "DX3rd.UrgeFear": "공포",
   "DX3rd.UrgeHatred": "증오",
-
   "DX3rd.Fly": "【비행】",
   "DX3rd.Stealth": "【은밀】",
   "DX3rd.Boarding": "【탑승】",
-
   "DX3rd.Defeated": "전투불능",
   "DX3rd.ActionEnd": "행동종료",
   "DX3rd.ActionDelay": "행동대기",
-
   "DX3rd.LostHP": "HP 상실",
   "DX3rd.TaintedDamage": "사독 피해",
   "DX3rd.Healing": "힐링",
-
   "DX3rd.StealthCharacter": "은밀 캐릭터",
   "DX3rd.StealthTargetCheck": "은밀 상태 확인",
-
   "DX3rd.CombatStart": "전투 개시",
   "DX3rd.CombatEnd": "전투 종료",
   "DX3rd.Round": "라운드",
@@ -292,5 +258,19 @@
   "DX3rd.Process": "프로세스",
   "DX3rd.MainStart": "메인 프로세스 개시",
   "DX3rd.CleanupStart": "클린업 프로세스 개시",
-  "DX3rd.ReCheck": "재확인"
+  "DX3rd.ReCheck": "재확인",
+  "TYPES.Actor.character": "캐릭터",
+  "TYPES.Item.effect": "이펙트",
+  "TYPES.Item.combo": "콤보",
+  "TYPES.Item.spell": "술식",
+  "TYPES.Item.psionic": "사이오닉",
+  "TYPES.Item.weapon": "무기",
+  "TYPES.Item.protect": "방어구",
+  "TYPES.Item.vehicle": "비클",
+  "TYPES.Item.connection": "커넥션",
+  "TYPES.Item.item": "아이템",
+  "TYPES.Item.works": "워크스",
+  "TYPES.Item.syndrome": "신드롬",
+  "TYPES.Item.rois": "로이스",
+  "TYPES.Item.record": "레코드"
 }

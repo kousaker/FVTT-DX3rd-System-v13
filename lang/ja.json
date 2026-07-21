@@ -13,7 +13,6 @@
   "DX3rd.Mind": "精神",
   "DX3rd.Social": "社会",
   "DX3rd.Skills": "技能値",
-
   "DX3rd.melee": "白兵",
   "DX3rd.dodge": "回避",
   "DX3rd.ride": "運転",
@@ -27,7 +26,6 @@
   "DX3rd.negotiation": "交渉",
   "DX3rd.procure": "調達",
   "DX3rd.info": "情報",
-
   "DX3rd.SubStatus": "副能力値",
   "DX3rd.Attack": "攻撃力",
   "DX3rd.Guard": "ガード",
@@ -40,25 +38,21 @@
   "DX3rd.EXP": "経験点",
   "DX3rd.EXPInit": "初期経験点",
   "DX3rd.EXPAppend": "獲得経験点",
-
   "DX3rd.Description": "紹介",
   "DX3rd.Combo": "コンボ",
   "DX3rd.Rois": "ロイス",
   "DX3rd.Equipment": "装備",
   "DX3rd.Applied": "効果",
-
   "DX3rd.CreateWorks": "ワークス作成",
   "DX3rd.CreateSyndrome": "シンドローム作成",
   "DX3rd.PureBreed": "ピュアブリード",
   "DX3rd.CrossBreed": "クロスブリード",
   "DX3rd.TriBreed": "トライブリード",
-
   "DX3rd.Key": "キー",
   "DX3rd.Name": "名前",
   "DX3rd.Value": "数値",
   "DX3rd.Add": "修正値",
   "DX3rd.Base": "能力値",
-
   "DX3rd.Cover": "カバー",
   "DX3rd.Ancestry": "出自",
   "DX3rd.Experience": "経験",
@@ -66,7 +60,6 @@
   "DX3rd.Awaken": "覚醒",
   "DX3rd.Impulse": "衝動",
   "DX3rd.Desire": "欲望",
-
   "DX3rd.Skill": "技能",
   "DX3rd.Difficulty": "難易度",
   "DX3rd.Limit": "制限",
@@ -75,7 +68,6 @@
   "DX3rd.Range": "射程",
   "DX3rd.Target": "対象",
   "DX3rd.Encroach": "侵食値",
-
   "DX3rd.Text": "効果参考",
   "DX3rd.Minor": "マイナー",
   "DX3rd.Major": "メジャー",
@@ -87,7 +79,6 @@
   "DX3rd.Always": "常時",
   "DX3rd.Easy": "イージー",
   "DX3rd.ExtraData": "その他",
-
   "DX3rd.Attributes": "効果",
   "DX3rd.Critical": "クリティカル",
   "DX3rd.CriticalMin": "クリティカル下限値",
@@ -111,10 +102,8 @@
   "DX3rd.SocialValue": "社会修正値",
   "DX3rd.SocialAdd": "社会修正",
   "DX3rd.SocialDice": "社会ダイス",
-
   "DX3rd.CreateSkill": "技能作成",
   "DX3rd.EditSkill": "技能編集",
-
   "DX3rd.Macro": "マクロ",
   "DX3rd.Active": "有効化",
   "DX3rd.DisableTiming": "非有効化",
@@ -129,11 +118,8 @@
   "DX3rd.AfterRound": "ラウンド終了後",
   "DX3rd.AfterScene": "シーン終了後",
   "DX3rd.AfterSession": "セッション終了後",
-
   "DX3rd.Special": "特殊",
-
   "DX3rd.Psionics": "サイオニック",
-
   "DX3rd.Spell": "術式",
   "DX3rd.SpellType": "種別",
   "DX3rd.Invoke": "発動値",
@@ -154,20 +140,15 @@
   "DX3rd.CastingAdd": "魔術修正",
   "DX3rd.Eibon": "エイボンの禁呪法",
   "DX3rd.Angel": "守護天使の召喚",
-
   "DX3rd.SpellResult": "魔術ロール結果",
   "DX3rd.OverflowDice": "暴走ダイス",
-
   "DX3rd.SpellDisaster": "魔術暴走發生",
   "DX3rd.SpellCalamity": "魔術大暴走發生",
   "DX3rd.SpellCatastrophe": "魔術災厄發生",
-
   "DX3rd.Success": "成功",
   "DX3rd.Failure": "失敗",
-
   "DX3rd.EquipType": "種別",
   "DX3rd.SellSaving": "購入/常備化",
-
   "DX3rd.Weapon": "武器",
   "DX3rd.Protect": "防具",
   "DX3rd.Vehicle": "ヴィークル",
@@ -177,7 +158,6 @@
   "DX3rd.Once": "使い捨て",
   "DX3rd.Book": "魔導書",
   "DX3rd.Quantity": "個数",
-
   "DX3rd.Type": "種別",
   "DX3rd.Memory": "メモリー",
   "DX3rd.Descripted": "D-ロイス",
@@ -190,17 +170,14 @@
   "DX3rd.Actor": "キャラクター",
   "DX3rd.DamageRoll": "ダメージロール",
   "DX3rd.WeaponSelect": "武器を選択?",
-
   "DX3rd.RollType": "判定タイプ",
   "DX3rd.AttackRoll": "攻撃",
   "DX3rd.DodgeRoll": "ドッジ",
   "DX3rd.DodgeDice": "ドッジダイス",
   "DX3rd.DodgeAdd": "ドッジ修正値",
-
   "DX3rd.Melee": "白兵",
   "DX3rd.Ranged": "射撃",
   "DX3rd.Engage": "至近",
-
   "DX3rd.DamageApply": "ダメージ適用",
   "DX3rd.Use": "使用する",
   "DX3rd.Roll": "ロール",
@@ -214,7 +191,6 @@
   "DX3rd.IgnoreArmor": "装甲無視",
   "DX3rd.ReduceDamage": "ダメージ減少",
   "DX3rd.Covering2": "2人をカバーリング",
-
   "DX3rd.EncroachmentCore": "侵食率(基本)",
   "DX3rd.EncroachmentEA": "侵食率(EA)",
   "DX3rd.EncroachmentOrigin": "侵食率(起源種)",
@@ -227,7 +203,6 @@
   "DX3rd.EnterSceneQuestion": "シーンに登場しますか？",
   "DX3rd.EnterScene": "登場",
   "DX3rd.Stock": "財産点",
-
   "DX3rd.SubAction1": "判定時のダイスを+10個する",
   "DX3rd.SubAction2": "判定の達成値を+1D10する",
   "DX3rd.SubAction3": "判定のクリティカル値を-1する",
@@ -237,5 +212,19 @@
   "DX3rd.SubAction7": "その他",
   "DX3rd.SubAction8": "ダメージロールのダイスを+5個する",
   "DX3rd.SubAction9": "戦闘不能から完全回復",
-  "DX3rd.SubAction0": "エフェクトの使用回数回復"
+  "DX3rd.SubAction0": "エフェクトの使用回数回復",
+  "TYPES.Actor.character": "キャラクター",
+  "TYPES.Item.effect": "エフェクト",
+  "TYPES.Item.combo": "コンボ",
+  "TYPES.Item.spell": "術式",
+  "TYPES.Item.psionic": "サイオニック",
+  "TYPES.Item.weapon": "武器",
+  "TYPES.Item.protect": "防具",
+  "TYPES.Item.vehicle": "ヴィークル",
+  "TYPES.Item.connection": "コネクション",
+  "TYPES.Item.item": "アイテム",
+  "TYPES.Item.works": "ワークス",
+  "TYPES.Item.syndrome": "シンドローム",
+  "TYPES.Item.rois": "ロイス",
+  "TYPES.Item.record": "レコード"
 }
