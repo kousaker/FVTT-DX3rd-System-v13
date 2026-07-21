@@ -3,29 +3,31 @@ import { DX3rdItemSheet } from "./item-sheet.js";
 export class DX3rdWorksSheet extends DX3rdItemSheet {
 
   /** @override */
-  async getData(options) {
-    let data = await super.getData(options);
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
 
     if (this.actor != null)
-      data.system.actorSkills = duplicate(this.actor.system.attributes.skills);
+      context.system.actorSkills = foundry.utils.duplicate(this.actor.system.attributes.skills);
     else
-      data.system.actorSkills = duplicate(game.DX3rd.baseSkills);
+      context.system.actorSkills = foundry.utils.duplicate(game.DX3rd.baseSkills);
 
-    return data;
+    return context;
   }
 
   /* -------------------------------------------- */
 
   /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
+  _onRender(context, options) {
+    super._onRender(context, options);
 
     // Everything below here is only needed if the sheet is editable
-    if (!this.options.editable) return;
+    if (!this.isEditable) return;
 
     // Add or Remove Attribute
-    html.find(".add-skills").on("click", ".skill-create", this._onSkillCreate.bind(this));
-    html.find(".skills").on("click", "a.attribute-control", this._onClickSKillControl.bind(this));
+    this.element.querySelectorAll(".add-skills .skill-create").forEach(el => {
+      el.addEventListener("click", this._onSkillCreate.bind(this));
+    });
+    this.element.querySelector(".skills")?.addEventListener("click", this._onClickSKillControl.bind(this));
   }
 
   /* -------------------------------------------- */
@@ -39,22 +41,23 @@ export class DX3rdWorksSheet extends DX3rdItemSheet {
 
     newKey = newKey.children[0];
     this.form.appendChild(newKey);
-    await this._onSubmit(event);
+    await this.submit();
   }
 
 
   /* -------------------------------------------- */
 
   async _onClickSKillControl(event) {
+    const a = event.target.closest("a.attribute-control");
+    if (!a) return;
     event.preventDefault();
-    const a = event.currentTarget;
+
     const action = a.dataset.action;
-    const type = a.dataset.type;
     const form = this.form;
 
     // Add new attribute
     if ( action === "create" ) {
-      if ($(form).find("input[name='system.skills.-.key']").length != 0)
+      if (form.querySelector("input[name='system.skills.-.key']"))
         return;
 
       let newKey = document.createElement("div");
@@ -63,29 +66,29 @@ export class DX3rdWorksSheet extends DX3rdItemSheet {
 
       newKey = newKey.children[0];
       form.appendChild(newKey);
-      await this._onSubmit(event);
+      await this.submit();
     }
 
     // Remove existing attribute
     else if ( action === "delete" ) {
       const li = a.closest(".attribute");
       li.parentElement.removeChild(li);
-      await this._onSubmit(event);
+      await this.submit();
     }
   }
 
   /** @override */
-  _getSubmitData(updateData) {
-    let formData = super._getSubmitData(updateData);
-    formData = this.updateSkills(formData);
-    return formData;
+  _prepareSubmitData(event, form, formData, updateData) {
+    let submitData = super._prepareSubmitData(event, form, formData, updateData);
+    submitData = this.updateSkills(submitData);
+    return submitData;
   }
 
-  updateSkills(formData) {
+  updateSkills(submitData) {
     // Handle the free-form attributes list
-    const formAttrs = expandObject(formData).system.skills || {};
+    const formAttrs = submitData.system?.skills ?? {};
 
-    let attributes = Object.values(formAttrs).reduce((obj, v) => {
+    const attributes = Object.values(formAttrs).reduce((obj, v) => {
       let k = v["key"].trim();
       if ( /[\s\.]/.test(k) ) {
         ui.notifications.error("Attribute keys may not contain spaces or periods");
@@ -97,21 +100,14 @@ export class DX3rdWorksSheet extends DX3rdItemSheet {
       return obj;
     }, {});
 
-    if (attributes == undefined)
-      attributes = this.object.system.skills;
-
     // Remove attributes which are no longer used
-    for ( let k of Object.keys(this.object.system.skills) ) {
+    for ( let k of Object.keys(this.item.system.skills) ) {
       if ( !attributes.hasOwnProperty(k) ) attributes[`-=${k}`] = null;
     }
 
-    // Re-combine formData
-    formData = Object.entries(formData).filter(e => !e[0].startsWith("system.skills")).reduce((obj, e) => {
-      obj[e[0]] = e[1];
-      return obj;
-    }, {id: this.object.id, "system.skills": attributes});
+    if (submitData.system) submitData.system.skills = attributes;
 
-    return formData;
+    return submitData;
   }
 
 
