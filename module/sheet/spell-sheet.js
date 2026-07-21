@@ -3,22 +3,22 @@ import { DX3rdItemSheet } from "./item-sheet.js";
 export class DX3rdSpellSheet extends DX3rdItemSheet {
 
   /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
+  _onRender(context, options) {
+    super._onRender(context, options);
 
     // Everything below here is only needed if the sheet is editable
-    if (!this.options.editable) return;
+    if (!this.isEditable) return;
 
     // Add or Remove Attribute
-    html.find(".show-actor").click(this._onShowActor.bind(this));
+    this.element.querySelector(".show-actor")?.addEventListener("click", this._onShowActor.bind(this));
   }
 
   async _onShowActor(event) {
     event.preventDefault();
 
-    let actorId = this.object.system.actor;
+    let actorId = this.item.system.actor;
     let actor = game.actors.get(actorId);
-  	actor.sheet.render(true);
+    actor.sheet.render({force: true});
   }
 
 }
