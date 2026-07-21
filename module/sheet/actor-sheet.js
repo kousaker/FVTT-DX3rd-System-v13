@@ -273,11 +273,13 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       }
       content += `</table>`;
 
-      new Dialog({
-        title: game.i18n.localize("DX3rd.Applied"),
+      // V1は buttons:{} の閉じるボタンのみのダイアログだった。DialogV2は
+      // 最低1つボタンが必要なため prompt で OK ボタンのみを出す。
+      foundry.applications.api.DialogV2.prompt({
+        window: { title: game.i18n.localize("DX3rd.Applied") },
         content: content,
-        buttons: {}
-      }).render(true);
+        ok: { label: "OK" }
+      });
     });
 
     this._bindAll('.remove-applied', 'click', async event => {
@@ -400,11 +402,11 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (event.ctrlKey)
       append = true;
 
-    Dialog.confirm({
-      title: game.i18n.localize("DX3rd.Combo"),
+    foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize("DX3rd.Combo") },
       content: "",
-      yes: async () => await new ComboDialog(this.actor, title, diceOptions, append).render(true),
-      no: async () => await this.actor.rollDice(title, diceOptions, append),
+      yes: { callback: async () => await new ComboDialog(this.actor, title, diceOptions, append).render({ force: true }) },
+      no: { callback: async () => await this.actor.rollDice(title, diceOptions, append) },
       defaultYes: false
     });
 
@@ -428,11 +430,11 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (event.ctrlKey)
       append = true;
 
-    Dialog.confirm({
-      title: game.i18n.localize("DX3rd.Combo"),
+    foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize("DX3rd.Combo") },
       content: "",
-      yes: async () => await new ComboDialog(this.actor, title, diceOptions, append).render(true),
-      no: async () => await this.actor.rollDice(title, diceOptions, append),
+      yes: { callback: async () => await new ComboDialog(this.actor, title, diceOptions, append).render({ force: true }) },
+      no: { callback: async () => await this.actor.rollDice(title, diceOptions, append) },
       defaultYes: false
     });
 
@@ -567,7 +569,58 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   /* -------------------------------------------- */
 
+  /**
+   * バックトラック共通処理: 指定式でロールし、侵蝕率を減算してチャットへ出力する。
+   * @param {string} formula   ロール式
+   * @param {string} title     チャットヘッダのタイトル
+   * @param {string} [subtitle] ヘッダ右肩に小さく添える補足(EXP追加 / x2 など)
+   */
+  async _applyBackTrack(formula, title, subtitle = "") {
+    const roll = new Roll(formula);
+    await roll.evaluate();
+
+    const before = this.actor.system.attributes.encroachment.value;
+    const after = (before - roll.total < 0) ? 0 : before - roll.total;
+
+    await this.actor.update({ "system.attributes.encroachment.value": after });
+
+    const rollMode = game.settings.get("core", "rollMode");
+    const rollData = await roll.render();
+
+    const header = subtitle
+      ? `<div class="title width-100">${title}<div style="font-size: smaller; color: gray; float: right;">${subtitle}</div></div>`
+      : `<div class="title">${title}</div>`;
+
+    const content = `
+      <div class="dx3rd-roll">
+        <h2 class="header">${header}</h2>
+        <div class="context-box">
+          ${game.i18n.localize("DX3rd.Encroachment")}: ${before} -> ${after} (-${roll.total})
+        </div>
+        ${rollData}
+      </div>
+    `;
+
+    ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: content,
+      style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+      sound: CONFIG.sounds.dice,
+      rolls: [roll],
+    }, { rollMode });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * バックトラック一連の処理。
+   * V1では Dialog の close コールバックで memory → eRois → backTrack と数珠つなぎに
+   * していたが、DialogV2 には同等のコンストラクタオプションが無いため、
+   * DialogV2.wait() を逐次 await する形へ組み替えている(挙動は同じ)。
+   * rejectClose: false により、ボタンを押さず閉じた場合も次のダイアログへ進む。
+   */
   async rollBackTrack() {
+    const { DialogV2 } = foundry.applications.api;
 
     let rois = 0;
     let memory = 0;
@@ -578,245 +631,100 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         memory += 1;
     }
 
-    let extraBackTrackDialog = new Dialog({
-      title: `${game.i18n.localize("DX3rd.BackTrack")} - ${game.i18n.localize("DX3rd.EXPExtra")}`,
+    const backTrackLabel = game.i18n.localize("DX3rd.BackTrack");
+    const memoryLabel = `${game.i18n.localize("DX3rd.Memory")} ${backTrackLabel}`;
+    const exhaustLabel = `${game.i18n.localize("DX3rd.Exhaust")} ${backTrackLabel}`;
+
+    // 1) メモリーによるバックトラック
+    await DialogV2.wait({
+      window: { title: memoryLabel },
       content: `
-        <h2>${game.i18n.localize("DX3rd.BackTrack")} - ${game.i18n.localize("DX3rd.EXPExtra")} (${rois})</h2>
-      `,
-      buttons: {
-        one: {
-          icon: '<i class="fas fa-check"></i>',
-          label: "Apply",
-          callback: async () => {
-            let formula = `${rois}D10`;
-
-            let roll = new Roll(formula);
-            await roll.evaluate();
-
-            let before = this.actor.system.attributes.encroachment.value;
-            let after = (before - roll.total < 0) ? 0 : before - roll.total;
-
-            await this.actor.update({ "system.attributes.encroachment.value": after });
-
-            let rollMode = game.settings.get("core", "rollMode");
-            let rollData = await roll.render();
-            let content = `
-              <div class="dx3rd-roll">
-                <h2 class="header"><div class="title width-100">
-                  ${game.i18n.localize("DX3rd.BackTrack")}
-                  <div style="font-size: smaller; color: gray; float: right;">${game.i18n.localize("DX3rd.EXPExtra")}</div>
-                </div></h2>
-                <div class="context-box">
-                  ${game.i18n.localize("DX3rd.Encroachment")}: ${before} -> ${after} (-${roll.total})
-                </div>
-                ${rollData}
-            `;
-
-            ChatMessage.create({
-              speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-              content: content + `</div>`,
-              style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-              sound: CONFIG.sounds.dice,
-              rolls: [roll],
-            }, { rollMode });
-
-          }
-        }
-      }
-    });
-
-    let backTrackDialog = new Dialog({
-      title: `${game.i18n.localize("DX3rd.BackTrack")}`,
-      content: `
-        <h2>${game.i18n.localize("DX3rd.BackTrack")} (${rois})</h2>
-      `,
-      buttons: {
-        one: {
-          icon: '<i class="fas fa-check"></i>',
-          label: "X 1",
-          callback: async () => {
-            let formula = `${rois}D10`;
-
-            let roll = new Roll(formula);
-            await roll.evaluate();
-
-            let before = this.actor.system.attributes.encroachment.value;
-            let after = (before - roll.total < 0) ? 0 : before - roll.total;
-
-            await this.actor.update({ "system.attributes.encroachment.value": after });
-
-            let rollMode = game.settings.get("core", "rollMode");
-            let rollData = await roll.render();
-            let content = `
-              <div class="dx3rd-roll">
-                <h2 class="header"><div class="title">${game.i18n.localize("DX3rd.BackTrack")}</div></h2>
-                <div class="context-box">
-                  ${game.i18n.localize("DX3rd.Encroachment")}: ${before} -> ${after} (-${roll.total})
-                </div>
-                ${rollData}
-            `;
-
-            ChatMessage.create({
-              speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-              content: content + `</div>`,
-              style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-              sound: CONFIG.sounds.dice,
-              rolls: [roll],
-            }, { rollMode });
-
-            if (this.actor.system.attributes.encroachment.value >= 100)
-              extraBackTrackDialog.render(true);
-          }
-        },
-        two: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "X 2",
-          callback: async () => {
-            let formula = `${rois * 2}D10`;
-
-            let roll = new Roll(formula);
-            await roll.evaluate();
-
-            let before = this.actor.system.attributes.encroachment.value;
-            let after = (before - roll.total < 0) ? 0 : before - roll.total;
-
-            await this.actor.update({ "system.attributes.encroachment.value": after });
-
-            let rollMode = game.settings.get("core", "rollMode");
-            let rollData = await roll.render();
-            let content = `
-              <div class="dx3rd-roll">
-                <h2 class="header"><div class="title width-100">
-                  ${game.i18n.localize("DX3rd.BackTrack")}
-                  <div style="font-size: smaller; color: gray; float: right;">${game.i18n.localize("DX3rd.EXPx2")}</div>
-                </div></h2>
-                <div class="context-box">
-                  ${game.i18n.localize("DX3rd.Encroachment")}: ${before} -> ${after} (-${roll.total})
-                </div>
-                ${rollData}
-            `;
-
-            ChatMessage.create({
-              speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-              content: content + `</div>`,
-              style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-              sound: CONFIG.sounds.dice,
-              rolls: [roll],
-            }, { rollMode });
-
-            if (this.actor.system.attributes.encroachment.value >= 100)
-              extraBackTrackDialog.render(true);
-          }
-        }
-      },
-      default: "one"
-    });
-
-
-    let eRoisDialog = new Dialog({
-      title: game.i18n.localize("DX3rd.Exhaust") + ' ' + game.i18n.localize("DX3rd.BackTrack"),
-      content: `
-        <h2>${game.i18n.localize("DX3rd.Exhaust")} ${game.i18n.localize("DX3rd.BackTrack")}</h2>
-        <input type="number" id="rois" placeholder="0">
-      `,
-      buttons: {
-        one: {
-          icon: '<i class="fas fa-check"></i>',
-          label: "Apply",
-          callback: async () => {
-            let eRois = document.getElementById("rois")?.value;
-            if (eRois != "" && eRois != 0) {
-              let formula = `${eRois}D10`;
-
-              let roll = new Roll(formula);
-              await roll.evaluate();
-
-              let before = this.actor.system.attributes.encroachment.value;
-              let after = (before - roll.total < 0) ? 0 : before - roll.total;
-
-              await this.actor.update({ "system.attributes.encroachment.value": after });
-
-              let rollMode = game.settings.get("core", "rollMode");
-              let rollData = await roll.render();
-              let content = `
-                <div class="dx3rd-roll">
-                  <h2 class="header">
-                    <div class="title">${game.i18n.localize("DX3rd.Exhaust")} ${game.i18n.localize("DX3rd.BackTrack")}</div></h2>
-                  <div class="context-box">
-                    ${game.i18n.localize("DX3rd.Encroachment")}: ${before} -> ${after} (-${roll.total})
-                  </div>
-                  ${rollData}
-              `;
-
-              ChatMessage.create({
-                speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-                content: content + `</div>`,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                sound: CONFIG.sounds.dice,
-                rolls: [roll],
-              }, { rollMode });
-            }
-
-          }
-        }
-      },
-      default: "one",
-      close: () => backTrackDialog.render(true)
-    });
-
-    let memoryDialog = new Dialog({
-      title: game.i18n.localize("DX3rd.Memory") + ' ' + game.i18n.localize("DX3rd.BackTrack"),
-      content: `
-        <h2>${game.i18n.localize("DX3rd.Memory")} ${game.i18n.localize("DX3rd.BackTrack")} (${memory})</h2>
+        <h2>${memoryLabel} (${memory})</h2>
         <input type="number" id="memory" placeholder="0" value="${memory}">
       `,
-      buttons: {
-        one: {
-          icon: '<i class="fas fa-check"></i>',
-          label: "Apply",
-          callback: async () => {
-            let memoryInput = document.getElementById("memory")?.value;
-            if (memoryInput != "" && memoryInput != 0) {
-              let formula = `${(memoryInput > memory) ? memory * 10 : memoryInput * 10}`;
-
-              let roll = new Roll(formula);
-              await roll.evaluate();
-
-              let before = this.actor.system.attributes.encroachment.value;
-              let after = (before - roll.total < 0) ? 0 : before - roll.total;
-
-              await this.actor.update({ "system.attributes.encroachment.value": after });
-
-              let rollMode = game.settings.get("core", "rollMode");
-              let rollData = await roll.render();
-              let content = `
-                <div class="dx3rd-roll">
-                  <h2 class="header">
-                    <div class="title">${game.i18n.localize("DX3rd.Memory")} ${game.i18n.localize("DX3rd.BackTrack")}</div></h2>
-                  <div class="context-box">
-                    ${game.i18n.localize("DX3rd.Encroachment")}: ${before} -> ${after} (-${roll.total})
-                  </div>
-                  ${rollData}
-              `;
-
-              ChatMessage.create({
-                speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-                content: content + `</div>`,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                sound: CONFIG.sounds.dice,
-                rolls: [roll],
-              }, { rollMode });
-            }
-
-          }
+      buttons: [{
+        action: "one",
+        icon: "fas fa-check",
+        label: "Apply",
+        default: true,
+        callback: async (event, button, dialog) => {
+          const input = dialog.element.querySelector("#memory")?.value;
+          if (input === "" || Number(input) === 0) return;
+          const used = (Number(input) > memory) ? memory : Number(input);
+          await this._applyBackTrack(`${used * 10}`, memoryLabel);
         }
-      },
-      default: "one",
-      close: () => eRoisDialog.render(true)
+      }],
+      rejectClose: false
     });
 
-    memoryDialog.render(true);
+    // 2) 消耗(エキゾースト)によるバックトラック
+    await DialogV2.wait({
+      window: { title: exhaustLabel },
+      content: `
+        <h2>${exhaustLabel}</h2>
+        <input type="number" id="rois" placeholder="0">
+      `,
+      buttons: [{
+        action: "one",
+        icon: "fas fa-check",
+        label: "Apply",
+        default: true,
+        callback: async (event, button, dialog) => {
+          const eRois = dialog.element.querySelector("#rois")?.value;
+          if (eRois === "" || Number(eRois) === 0) return;
+          await this._applyBackTrack(`${eRois}D10`, exhaustLabel);
+        }
+      }],
+      rejectClose: false
+    });
 
+    // 3) 通常のバックトラック(x1 / x2)
+    let applied = false;
+    await DialogV2.wait({
+      window: { title: backTrackLabel },
+      content: `<h2>${backTrackLabel} (${rois})</h2>`,
+      buttons: [
+        {
+          action: "one",
+          icon: "fas fa-check",
+          label: "X 1",
+          default: true,
+          callback: async () => {
+            applied = true;
+            await this._applyBackTrack(`${rois}D10`, backTrackLabel);
+          }
+        },
+        {
+          action: "two",
+          icon: "fas fa-times",
+          label: "X 2",
+          callback: async () => {
+            applied = true;
+            await this._applyBackTrack(`${rois * 2}D10`, backTrackLabel, game.i18n.localize("DX3rd.EXPx2"));
+          }
+        }
+      ],
+      rejectClose: false
+    });
+
+    // 4) バックトラックしてなお侵蝕率100以上なら、EXP追加のバックトラック
+    if (applied && this.actor.system.attributes.encroachment.value >= 100) {
+      const extraLabel = `${backTrackLabel} - ${game.i18n.localize("DX3rd.EXPExtra")}`;
+      await DialogV2.wait({
+        window: { title: extraLabel },
+        content: `<h2>${extraLabel} (${rois})</h2>`,
+        buttons: [{
+          action: "one",
+          icon: "fas fa-check",
+          label: "Apply",
+          default: true,
+          callback: async () => {
+            await this._applyBackTrack(`${rois}D10`, backTrackLabel, game.i18n.localize("DX3rd.EXPExtra"));
+          }
+        }],
+        rejectClose: false
+      });
+    }
   }
 
   /* -------------------------------------------- */
