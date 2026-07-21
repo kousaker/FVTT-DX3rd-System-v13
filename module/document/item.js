@@ -457,7 +457,7 @@ export class DX3rdItem extends Item {
     let attributes = this.system.effect.attributes;
     let level = ("level" in this.system) ? this.system.level.value : 0;
 
-    let copy = duplicate(attributes);
+    let copy = foundry.utils.deepClone(attributes);
     for (const [key, value] of Object.entries(attributes)) {
       if (key == '-' || key == 'critical_min')
         continue;
@@ -550,49 +550,51 @@ export class DX3rdItem extends Item {
         label: `${game.i18n.localize("DX3rd.Superier")}: ${game.i18n.localize("DX3rd.SubAction0")}`,
         callback: async () => {
           const actor = this.actor;
-          const effects = actor.items.filter(item => item.data.type === "effect");
+          const effects = actor.items.filter(item => item.type === "effect");
           const usedEffects = effects.filter(effect => effect.system.used.state > 0);
-      
+
           if (usedEffects.length === 0) {
             ui.notifications.info("There are no effects with spent usage.");
             return;
           };
-      
+
           let usedEffectContent = "";
           usedEffects.forEach(item => {
             let effectName = item.name;
             let effectId = item.id;
             usedEffectContent += `<button class="macro-button" data-effectid="${effectId}">${effectName}</button>`;
           });
-      
-          let callDialog = new Dialog({
-            title: `${game.i18n.localize("DX3rd.Superier")}: ${game.i18n.localize("DX3rd.SubAction0")}`,
+
+          let callDialog = new foundry.applications.api.DialogV2({
+            window: { title: `${game.i18n.localize("DX3rd.Superier")}: ${game.i18n.localize("DX3rd.SubAction0")}` },
             content: usedEffectContent,
-            buttons: {},
+            buttons: [],
             close: () => { },
-            render: html => {
-              html.find(".macro-button").click(async ev => {
-                const effectId = ev.currentTarget.dataset.effectid;
-                const effect = actor.items.get(effectId);
-      
-                const used = effect.system.used.state;
-                const newUsed = used - 1;
-      
-                await effect.update({"system.used.state": newUsed});
-      
-                const chatData = {
-                  user: game.user.id,
-                  speaker: ChatMessage.getSpeaker({ actor: actor }),
-                  content: `${game.i18n.localize("DX3rd.SubAction0")}: ${effect.name}`
-                };
-                ChatMessage.create(chatData);
-                callDialog.close();
+            render: (event, dialog) => {
+              dialog.element.querySelectorAll(".macro-button").forEach(btn => {
+                btn.addEventListener("click", async ev => {
+                  const effectId = ev.currentTarget.dataset.effectid;
+                  const effect = actor.items.get(effectId);
+
+                  const used = effect.system.used.state;
+                  const newUsed = used - 1;
+
+                  await effect.update({"system.used.state": newUsed});
+
+                  const chatData = {
+                    user: game.user.id,
+                    speaker: ChatMessage.getSpeaker({ actor: actor }),
+                    content: `${game.i18n.localize("DX3rd.SubAction0")}: ${effect.name}`
+                  };
+                  ChatMessage.create(chatData);
+                  callDialog.close();
+                });
               });
             }
           });
-      
+
           callDialog.render(true);
-      
+
           const chatData = {
             user: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
@@ -626,7 +628,7 @@ export class DX3rdItem extends Item {
           ChatMessage.create(chatData);
 
           let roll = new Roll("1d10");
-          await roll.roll({ async: true });
+          await roll.evaluate();
 
           roll.toMessage();
         }
@@ -713,7 +715,7 @@ export class DX3rdItem extends Item {
             ChatMessage.create(chatData);
 
             let roll = new Roll("1d10");
-            await roll.roll({ async: true });
+            await roll.evaluate();
 
             roll.toMessage();
           }
@@ -791,8 +793,13 @@ export class DX3rdItem extends Item {
 
     await this.update({ "system.sublimation": true });
 
-    let dialog = new Dialog({
-      title: game.i18n.localize("DX3rd.Sublimation"),
+    let buttonList = Object.entries(buttons).map(([action, config]) => ({
+      action,
+      ...config,
+    }));
+
+    let dialog = new foundry.applications.api.DialogV2({
+      window: { title: game.i18n.localize("DX3rd.Sublimation") },
       content: `
         <h2>${game.i18n.localize("DX3rd.Sublimation")}: ${this.name}</h2>
         <style>
@@ -801,8 +808,10 @@ export class DX3rdItem extends Item {
         }
         </style>
       `,
-      buttons: buttons
-    }, { classes: ["dx3rd", "dialog", "sublimation"], top: 300, left: 20 }).render(true);
+      buttons: buttonList,
+      classes: ["dx3rd", "dialog", "sublimation"],
+      position: { top: 300, left: 20 },
+    }).render(true);
 
   }
 
@@ -822,10 +831,10 @@ export class DX3rdItem extends Item {
       scope.actor = actor;
       await macro.execute(scope);
     } else if (this.system.macro != "")
-      new Dialog({
-        title: "macro",
+      new foundry.applications.api.DialogV2({
+        window: { title: "macro" },
         content: `Do not find this macro: ${this.system.macro}`,
-        buttons: {}
+        buttons: [],
       }).render(true);
   }
 

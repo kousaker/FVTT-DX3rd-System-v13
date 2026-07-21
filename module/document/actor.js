@@ -896,7 +896,7 @@ export class DX3rdActor extends Actor {
                 <td><input type='text' id='roll-critical' value='${diceOptions.critical}'></td>
                 <td><input type='text' id='roll-add' value='${diceOptions.add}'></td>
               </tr>
-            </table><script>$("#roll-dice").focus()</script>
+            </table>
         `;
 
     if (this.system.conditions.fear?.active && selectedTargets.length > 0) {
@@ -927,83 +927,93 @@ export class DX3rdActor extends Actor {
     }
 
     // updateOptions 함수에서 다이얼로그 입력값을 diceOptions에 반영
-    let updateOptions = () => {
-      // NaN 처리 및 값 반영
-      diceOptions.dice = Number($("#roll-dice").val()) || diceOptions.dice;
-      diceOptions.critical = Number($("#roll-critical").val()) || diceOptions.critical;
-      diceOptions.add = Number($("#roll-add").val()) || diceOptions.add;
+    let updateOptions = (dialog) => {
+      let element = dialog.element;
 
-      diceOptions.fearChecked = $("#fear").is(":checked");  // fear 체크 상태 저장
+      // NaN 처리 및 값 반영
+      diceOptions.dice = Number(element.querySelector("#roll-dice")?.value) || diceOptions.dice;
+      diceOptions.critical = Number(element.querySelector("#roll-critical")?.value) || diceOptions.critical;
+      diceOptions.add = Number(element.querySelector("#roll-add")?.value) || diceOptions.add;
+
+      diceOptions.fearChecked = element.querySelector("#fear")?.checked ?? false;  // fear 체크 상태 저장
       if (diceOptions.fearChecked) {
         diceOptions.dice -= 2;  // fear 체크 시 주사위 -2 적용
       }
 
-      if ($("#distaste").is(":checked")) {
+      if (element.querySelector("#distaste")?.checked) {
         diceOptions.add -= 10;
       }
     };
 
     let deleteHatred = async () => {
       if (this.system.conditions.hatred?.active) {
-        const effect = this.effects.find(e => e.data.flags?.dx3rd?.statusId === "hatred");
+        const effect = this.effects.find(e => e.flags?.dx3rd?.statusId === "hatred");
         await effect.delete();
       }
     };
 
     // 버튼 생성
-    let buttons = {
-      major: {
+    let buttons = [
+      {
+        action: "major",
         icon: '<i class="fas fa-check"></i>',
         label: game.i18n.localize("DX3rd.Major"),
-        callback: () => {
+        default: true,
+        callback: (event, button, dialog) => {
           deleteHatred();
-          updateOptions(); // 수정된 값을 diceOptions에 반영
+          updateOptions(dialog); // 수정된 값을 diceOptions에 반영
           diceOptions["rollType"] = "major";
           this._onRollDice(title, diceOptions); // 반영된 값으로 주사위 굴림
         },
       },
-      reaction: {
+      {
+        action: "reaction",
         icon: '<i class="fas fa-check"></i>',
         label: game.i18n.localize("DX3rd.Reaction"),
-        callback: () => {
+        callback: (event, button, dialog) => {
           deleteHatred();
-          updateOptions(); // 수정된 값을 diceOptions에 반영
+          updateOptions(dialog); // 수정된 값을 diceOptions에 반영
           diceOptions["rollType"] = "reaction";
           this._onRollDice(title, diceOptions); // 반영된 값으로 주사위 굴림
         },
       },
-      dodge: {
+      {
+        action: "dodge",
         icon: '<i class="fas fa-check"></i>',
         label: game.i18n.localize("DX3rd.Dodge"),
-        callback: () => {
+        callback: (event, button, dialog) => {
           deleteHatred();
-          updateOptions(); // 수정된 값을 diceOptions에 반영
+          updateOptions(dialog); // 수정된 값을 diceOptions에 반영
           diceOptions["rollType"] = "dodge";
           this._onRollDice(title, diceOptions); // 반영된 값으로 주사위 굴림
         },
       },
-    };
+    ];
 
     if ("rollType" in diceOptions) {
-      buttons = {
-        major: {
+      buttons = [
+        {
+          action: "major",
           icon: '<i class="fas fa-check"></i>',
           label: game.i18n.localize("DX3rd.Roll"),
-          callback: () => {
+          default: true,
+          callback: (event, button, dialog) => {
             deleteHatred();
-            updateOptions(); // 수정된 값을 diceOptions에 반영
+            updateOptions(dialog); // 수정된 값을 diceOptions에 반영
             this._onRollDice(title, diceOptions); // 반영된 값으로 주사위 굴림
           },
         }
-      };
+      ];
     }
 
     // 다이얼로그 렌더링
-    new Dialog({
-      title: game.i18n.localize("DX3rd.RollType"),
+    new foundry.applications.api.DialogV2({
+      window: { title: game.i18n.localize("DX3rd.RollType") },
       content: content,
       buttons: buttons,
-      default: "major",
+      render: (event, dialog) => {
+        dialog.element.querySelector("#roll-dice")?.focus();
+      },
     }).render(true);
   }
 
@@ -1015,7 +1025,7 @@ export class DX3rdActor extends Actor {
     // 주사위 공식 생성
     let formula = `${dice}dx${critical} + ${add}`;
     let roll = new Roll(formula);
-    await roll.roll({ async: true });
+    await roll.evaluate();
 
     let rollMode = game.settings.get("core", "rollMode");
     let rollData = await roll.render();
@@ -1038,9 +1048,8 @@ export class DX3rdActor extends Actor {
       {
         speaker: ChatMessage.getSpeaker({ actor: this }),
         content: content,
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: [roll],
         sound: CONFIG.sounds.dice,
-        roll: roll,
       },
       { rollMode }
     );
@@ -1086,8 +1095,8 @@ export class DX3rdActor extends Actor {
       invokeText = `${invoke}(${evocation})`;
     }
 
-    new Dialog({
-      title: game.i18n.localize("DX3rd.CastingRoll"),
+    new foundry.applications.api.DialogV2({
+      window: { title: game.i18n.localize("DX3rd.CastingRoll") },
       content: `
         <h2 style="text-align: center;">${game.i18n.localize(
           "DX3rd.CastingDice"
@@ -1098,42 +1107,43 @@ export class DX3rdActor extends Actor {
           <tr>
             <th style="white-space: nowrap;">${game.i18n.localize("DX3rd.AddDice").replace(" ", "<br>")}</th>
             <td><input type="number" id="append-dice" value="${appendDice}" style="width: 100px;"></td>
-    
+
             <th style="white-space: nowrap;">${game.i18n.localize("DX3rd.AddResult").replace(" ", "<br>")}</th>
             <td><input type="number" id="append-add" value="${appendAdd}" style="width: 100px;"></td>
           </tr>
-    
+
           <tr>
             <th style="white-space: nowrap;">${game.i18n.localize("DX3rd.Eibon").replace(" ", "<br>")}</th>
             <td><input type="checkbox" id="eibon"></td>
-    
+
             <th style="white-space: nowrap;">${game.i18n.localize("DX3rd.Angel").replace(" ", "<br>")}</th>
             <td><input type="checkbox" id="angel"></td>
           </tr>
         </table>
       `,
-      buttons: {
-        confirm: {
+      buttons: [
+        {
+          action: "confirm",
           icon: '<i class="fas fa-check"></i>',
           label: "Confirm",
-          callback: async () => {
-            let addDice =
-              $("#append-dice").val() != ""
-                ? Number($("#append-dice").val())
-                : 0;
-            let addResult =
-              $("#append-add").val() != "" ? Number($("#append-add").val()) : 0;
+          default: true,
+          callback: async (event, button, dialog) => {
+            let element = dialog.element;
+            let addDiceInput = element.querySelector("#append-dice")?.value;
+            let addDice = addDiceInput != "" && addDiceInput != null ? Number(addDiceInput) : 0;
+            let addResultInput = element.querySelector("#append-add")?.value;
+            let addResult = addResultInput != "" && addResultInput != null ? Number(addResultInput) : 0;
             let eibonDice = Math.max(1, Math.ceil(cthulhu / 4));
 
             // eibon 및 angel 체크박스 상태 확인
-            let isEibonChecked = $("#eibon").is(":checked");
-            let isAngelChecked = $("#angel").is(":checked");
+            let isEibonChecked = element.querySelector("#eibon")?.checked ?? false;
+            let isAngelChecked = element.querySelector("#angel")?.checked ?? false;
 
             // 기본 주사위 계산
             let totalDice = castingDice + addDice;
             let formula = `${totalDice}d10 + ${addResult}`;
             let roll = new Roll(formula);
-            await roll.evaluate({ async: true });
+            await roll.evaluate();
             let rollData = await roll.render();
             let total = roll.total;
 
@@ -1149,7 +1159,7 @@ export class DX3rdActor extends Actor {
 
             while (extraDice > 0) {
               let extraRoll = new Roll(`${extraDice}d10`);
-              await extraRoll.evaluate({ async: true });
+              await extraRoll.evaluate();
               rollData += await extraRoll.render();
               total += extraRoll.total;
               // 추가 주사위 결과를 allDiceResults에 추가
@@ -1207,8 +1217,7 @@ export class DX3rdActor extends Actor {
             });
           },
         },
-      },
-      default: "confirm",
+      ],
     }).render(true);
 
     async function handleEibon(
@@ -1234,16 +1243,18 @@ export class DX3rdActor extends Actor {
       content += "</div>";
 
       await new Promise((resolve) => {
-        new Dialog({
-          title: `${game.i18n.localize("DX3rd.Eibon")}`,
+        new foundry.applications.api.DialogV2({
+          window: { title: `${game.i18n.localize("DX3rd.Eibon")}` },
           content: `<p>Remove up to ${eibonDice} dice:</p>${content}`,
-          buttons: {
-            confirm: {
+          buttons: [
+            {
+              action: "confirm",
               label: "Confirm",
-              callback: () => {
-                let selected = $(".eibon-die:checked")
-                  .map((_, el) => $(el).data("index"))
-                  .get();
+              default: true,
+              callback: (event, button, dialog) => {
+                let selected = Array.from(
+                  dialog.element.querySelectorAll(".eibon-die:checked")
+                ).map((el) => Number(el.dataset.index));
                 if (selected.length !== eibonDice) {
                   ui.notifications.info(
                     `You must remove ${eibonDice} dice.`
@@ -1291,7 +1302,7 @@ export class DX3rdActor extends Actor {
                 }
               },
             },
-          },
+          ],
         }).render(true);
       });
     }
@@ -1320,16 +1331,18 @@ export class DX3rdActor extends Actor {
         content += "</div>";
 
         await new Promise((resolve) => {
-          new Dialog({
-            title: `${game.i18n.localize("DX3rd.Angel")}`,
+          new foundry.applications.api.DialogV2({
+            window: { title: `${game.i18n.localize("DX3rd.Angel")}` },
             content: `<p>Remove up to 1 die (optional):</p>${content}`,
-            buttons: {
-              confirm: {
+            buttons: [
+              {
+                action: "confirm",
                 label: "Confirm",
-                callback: () => {
-                  let selected = $(".angel-die:checked")
-                    .map((_, el) => $(el).data("index"))
-                    .get();
+                default: true,
+                callback: (event, button, dialog) => {
+                  let selected = Array.from(
+                    dialog.element.querySelectorAll(".angel-die:checked")
+                  ).map((el) => Number(el.dataset.index));
                   if (selected.length > 1) {
                     ui.notifications.info("You can only remove up to 1 die.");
                     handleAngel(
@@ -1362,7 +1375,7 @@ export class DX3rdActor extends Actor {
                   resolve();
                 },
               },
-            },
+            ],
           }).render(true);
         });
       } else {
@@ -1438,10 +1451,10 @@ export class DX3rdActor extends Actor {
         if (macro != undefined) {
           macro.execute();
         } else if (diceOptions.macro != "") {
-          new Dialog({
-            title: "macro",
+          new foundry.applications.api.DialogV2({
+            window: { title: "macro" },
             content: `Do not find this macro: ${diceOptions.macro}`,
-            buttons: {},
+            buttons: [],
           }).render(true);
         }
         
@@ -1466,9 +1479,8 @@ export class DX3rdActor extends Actor {
       ChatMessage.create(
         {
           content: content,
-          type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+          rolls: [roll],
           sound: CONFIG.sounds.dice,
-          roll: roll,
         },
         { rollMode: game.settings.get("core", "rollMode") }
       );
@@ -1521,8 +1533,8 @@ Hooks.on("preUpdateActor", async (actor, updateData) => {
 
 Hooks.on("updateActor", async (actor, updateData) => {
   // HP 값이 업데이트된 경우
-  if (hasProperty(updateData, "system.attributes.hp.value")) {
-    let newHp = getProperty(updateData, "system.attributes.hp.value");
+  if (foundry.utils.hasProperty(updateData, "system.attributes.hp.value")) {
+    let newHp = foundry.utils.getProperty(updateData, "system.attributes.hp.value");
 
     // HP가 0 이하로 떨어졌을 경우
     if (newHp <= 0) {
