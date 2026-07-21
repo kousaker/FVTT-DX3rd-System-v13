@@ -1538,21 +1538,26 @@
 
 /* --- 効果タブのラベルが縦に折り返す ---
    「判定タイプ」が幅28pxで3行、「非有効化」「使用回数」「回数リセット」
-   「+ レベル修正」が2行になっていた。ラベルは内容幅を確保して折り返さない。 */
-.dx3rd .sheet-attributes .cell span,
-.dx3rd .sheet-attributes .cell label,
-.dx3rd .item .cell > span,
-.dx3rd .item .cell > label {
-  flex: 0 0 auto;
-  min-width: max-content;
+   「+ レベル修正」が2行になっていた。
+   この領域は <table> レイアウトで、ラベルは <th> 内の <span>。幅はテーブルの
+   列配分で決まるため、th 自体を nowrap + width:1% にして「必要最小限だけ確保し、
+   余りは入力欄へ回す」形にする。nowrap時の必要幅は最大85pxで、行合計でも
+   シート幅520pxに収まることを実測で確認済み。 */
+.dx3rd .item table th {
   white-space: nowrap;
+  width: 1%;
 }
 
 /* --- セレクトの選択値が見切れる ---
    「集計しない」が67px枠に76px必要で切れていた。
-   内容が入る幅を下限として確保する。 */
-.dx3rd .item select {
-  min-width: max-content;
+   min-width:max-content は最長の選択肢に合わせるため137pxまで膨らみ、同じ行の
+   ラベル列を14pxまで圧迫して折り返しを悪化させた(実機で確認)。使わない。
+   上の th 固定で空いた分をセルいっぱいに使わせる。 */
+.dx3rd .item table td select,
+.dx3rd .item table td input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* --- 「+」「ゴミ箱」などの操作アイコン ---
