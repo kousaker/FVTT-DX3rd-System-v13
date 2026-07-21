@@ -806,7 +806,7 @@ export class DX3rdActor extends Actor {
         delete: true,
       };
 
-      await this.update({ [`data.attributes.skills.${key}`]: skill });
+      await this.update({ [`system.attributes.skills.${key}`]: skill });
     }
   }
 
@@ -1496,10 +1496,10 @@ export class DX3rdActor extends Actor {
     let updates;
     if (isBar) {
       if (isDelta) value = Number(current.value) + value;
-      updates = { [`data.${attribute}.value`]: value };
+      updates = { [`system.${attribute}.value`]: value };
     } else {
       if (isDelta) value = Number(current) + value;
-      updates = { [`data.${attribute}`]: value };
+      updates = { [`system.${attribute}`]: value };
     }
 
     const allowed = Hooks.call(
