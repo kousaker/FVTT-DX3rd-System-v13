@@ -696,8 +696,8 @@
 
                     <h4 class="item-addon">
                       {{#if item.system.sublimation}}
-                        <input type="checkbox" class="active-titus" {{#if item.system.titus}} checked {{/if}}>
-                        <input type="checkbox" class="active-sublimation" {{#if item.system.sublimation}} checked {{/if}}>
+                        <input type="checkbox" class="active-titus" title="{{localize 'DX3rd.Titus'}}" {{#if item.system.titus}} checked {{/if}}>
+                        <input type="checkbox" class="active-sublimation" title="{{localize 'DX3rd.Sublimation'}}" {{#if item.system.sublimation}} checked {{/if}}>
                       {{else}}
                         {{#if item.system.titus}}
                         <button class="btn-sublimation">{{localize "DX3rd.Sublimation"}}</button>

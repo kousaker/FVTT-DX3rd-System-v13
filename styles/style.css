@@ -1766,3 +1766,21 @@
 .dx3rd .items-list .titus .item-description {
   color: crimson;
 }
+
+/* --- アイテム行の操作アイコンが右端に張り付く ---
+   実測で行の右端との余白が 0px だった。編集/削除アイコンとチェックボックスに
+   適度な間隔を持たせ、行の縁からも離す。 */
+.dx3rd .items-list .item .item-controls {
+  padding-right: 8px;
+  gap: 6px;
+}
+
+.dx3rd .items-list .item .item-addon {
+  padding-right: 10px;
+  gap: 6px;
+}
+
+/* アイコン同士がくっつかないよう、クリック領域も含めて間隔を確保する。 */
+.dx3rd .items-list .item .item-controls .item-control {
+  padding: 0 3px;
+}
