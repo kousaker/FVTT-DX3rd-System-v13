@@ -1656,3 +1656,45 @@
   font-size: 15px;
   letter-spacing: 0.01em;
 }
+
+/* ============================================================================
+   明るい地(パーチメント)に合わせた文字色の統一 (v2.1.9)
+
+   v2.1.7 でシートの地を両テーマともパーチメントに固定した結果、暗い地を
+   前提にしていた文字色が破綻した。アイテム名は rgb(239,230,216) の
+   クリーム色で、パーチメント(約 222,211,185)に対しコントラスト比 1.2 と
+   ほぼ同系色になり読めなくなっていた(実測)。
+
+   このシートは「明るい地 + 暗い文字」「黒いラベル + 白文字」の二層構成に
+   統一する。地の上に直接乗る文字は暗色に揃える。
+   ============================================================================ */
+.dx3rd .items-list .item .item-label,
+.dx3rd .items-list .item .item-name,
+.dx3rd .items-list .item .item-addon {
+  color: #191813;
+}
+
+/* 補助情報(タイミング/技能/対象 などの行)は本文より薄いが、
+   rgb(128,128,128) では比2.66しかないため濃くする。 */
+.dx3rd .items-list .item .item-detail,
+.dx3rd .items-list .item .item-description {
+  color: #4a453c;
+}
+
+/* --- チェックボックスの視認性 ---
+   ::before を白地+枠にしても、明るいパーチメント上では境界が分かりにくい。
+   input 自体にも輪郭線を引いて、未選択でも「四角がそこにある」ことを示す。 */
+.dx3rd input[type="checkbox"] {
+  background: #fff;
+  outline: 1px solid #191813;
+  outline-offset: -1px;
+}
+
+.dx3rd input[type="checkbox"]::before {
+  background: #fff;
+  border: 1px solid #191813;
+}
+
+.dx3rd input[type="checkbox"]:checked::before {
+  color: #191813;
+}
