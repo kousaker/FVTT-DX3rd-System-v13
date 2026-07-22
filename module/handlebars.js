@@ -17,6 +17,23 @@ export class DX3rdRegisterHelpers {
      * 既定技能はキー欄を日本語表示の読み取り専用にし、ユーザーが追加した
      * カスタム技能だけキーを直接編集できるようにするために使う。
      */
+    /**
+     * ロイスの状態を1語で返す。normal → titus → sublimation の順に進む。
+     * 行の右側に置く状態バッジの表示と配色に使う。
+     */
+    Handlebars.registerHelper('roisState', function(item) {
+      if (item?.system?.sublimation) return "sublimation";
+      if (item?.system?.titus) return "titus";
+      return "normal";
+    });
+
+    /** 上記の状態に対応する表示名。 */
+    Handlebars.registerHelper('roisStateLabel', function(item) {
+      if (item?.system?.sublimation) return game.i18n.localize("DX3rd.Sublimation");
+      if (item?.system?.titus) return game.i18n.localize("DX3rd.Titus");
+      return game.i18n.localize("DX3rd.Rois");
+    });
+
     Handlebars.registerHelper('isBaseSkill', function(key) {
       return key != null && key !== "-" && !!game.DX3rd?.baseSkills?.[key];
     });

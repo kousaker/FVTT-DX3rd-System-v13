@@ -219,32 +219,35 @@ export class DX3rdActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       await item.update({ 'system.equipment': !item.system.equipment });
     });
 
-    this._bindAll('.active-titus', 'click', async event => {
+    /**
+     * ロイスの状態バッジ。1つのバッジを押すたびに
+     *   ロイス → タイタス → 昇華 → ロイス(取り消し)
+     * と循環する。
+     *
+     * 以前はボタン(setTitus/setSublimation を実行)とチェックボックス
+     * (フラグを直接トグル)が状態に応じて入れ替わっており、押した時に
+     * 何が起きるか見た目から予測できなかった。操作をこの1点に集約する。
+     *
+     * 昇華への遷移では setSublimation() が選択ダイアログを開く。
+     * 一周して「ロイス」へ戻す操作は誤操作の取り消し用なので、
+     * チャット通知もダイアログも出さずフラグだけを落とす。
+     */
+    this._bindAll('.rois-badge', 'click', async event => {
       event.preventDefault();
       const li = event.currentTarget.closest(".item");
       const item = this.actor.items.get(li.dataset.itemId);
-      await item.update({ 'system.titus': !item.system.titus });
-    });
+      if (!item) return;
 
-    this._bindAll('.active-sublimation', 'click', async event => {
-      event.preventDefault();
-      const li = event.currentTarget.closest(".item");
-      const item = this.actor.items.get(li.dataset.itemId);
-      await item.update({ 'system.sublimation': !item.system.sublimation });
-    });
-
-    this._bindAll('.btn-titus', 'click', async event => {
-      event.preventDefault();
-      const li = event.currentTarget.closest(".item");
-      const item = this.actor.items.get(li.dataset.itemId);
-      await item.setTitus();
-    });
-
-    this._bindAll('.btn-sublimation', 'click', async event => {
-      event.preventDefault();
-      const li = event.currentTarget.closest(".item");
-      const item = this.actor.items.get(li.dataset.itemId);
-      await item.setSublimation();
+      if (item.system.sublimation) {
+        // 昇華 → ロイス(取り消し)
+        await item.update({ "system.titus": false, "system.sublimation": false });
+      } else if (item.system.titus) {
+        // タイタス → 昇華(ダイアログが開く)
+        await item.setSublimation();
+      } else {
+        // ロイス → タイタス(チャットへ通知)
+        await item.setTitus();
+      }
     });
 
 

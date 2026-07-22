@@ -286,5 +286,6 @@
   "DX3rd.Notify.OnlyOneDieRemovable": "제거할 수 있는 주사위는 1개까지입니다.",
   "DX3rd.Notify.NoHealWhileBloodsucking": "[폭주: 흡혈] 상태에서는 HP를 회복할 수 없습니다.",
   "DX3rd.Notify.InvalidAttributeKey": "속성 키에는 공백과 마침표를 사용할 수 없습니다.",
-  "DX3rd.Notify.MacroNotFound": "해당 매크로를 찾을 수 없습니다: {name}"
+  "DX3rd.Notify.MacroNotFound": "해당 매크로를 찾을 수 없습니다: {name}",
+  "DX3rd.RoisBadgeHint": "클릭하면 로이스 → 타이터스 → 승화 → 로이스 순으로 전환됩니다"
 }

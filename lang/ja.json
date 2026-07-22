@@ -286,5 +286,6 @@
   "DX3rd.Notify.OnlyOneDieRemovable": "取り除けるダイスは1個までです。",
   "DX3rd.Notify.NoHealWhileBloodsucking": "【暴走:吸血】状態ではHPを回復できません。",
   "DX3rd.Notify.InvalidAttributeKey": "属性キーに空白とピリオドは使用できません。",
-  "DX3rd.Notify.MacroNotFound": "このマクロが見つかりません: {name}"
+  "DX3rd.Notify.MacroNotFound": "このマクロが見つかりません: {name}",
+  "DX3rd.RoisBadgeHint": "クリックで ロイス → タイタス → 昇華 → ロイス と切り替わります"
 }

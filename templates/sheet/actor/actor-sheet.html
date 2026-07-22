@@ -695,16 +695,11 @@
                     </h4>
 
                     <h4 class="item-addon">
-                      {{#if item.system.sublimation}}
-                        <label class="toggle-with-label"><span>{{localize "DX3rd.Titus"}}</span><input type="checkbox" class="active-titus" {{#if item.system.titus}} checked {{/if}}></label>
-                        <label class="toggle-with-label"><span>{{localize "DX3rd.Sublimation"}}</span><input type="checkbox" class="active-sublimation" {{#if item.system.sublimation}} checked {{/if}}></label>
-                      {{else}}
-                        {{#if item.system.titus}}
-                        <button class="btn-sublimation">{{localize "DX3rd.Sublimation"}}</button>
-                        {{else}}
-                        <button class="btn-titus">{{localize "DX3rd.Titus"}}</button>
-                        {{/if}}
-                      {{/if}}
+                      {{!-- 状態バッジ1つで ロイス → タイタス → 昇華 → ロイス と循環させる。
+                            以前はボタンとチェックボックスが状態に応じて入れ替わり、
+                            見た目から次に何が起きるか予測できなかった。 --}}
+                      <button class="rois-badge" data-state="{{roisState item}}"
+                              title="{{localize 'DX3rd.RoisBadgeHint'}}">{{roisStateLabel item}}</button>
                       
                     </h4>
                     <div class="item-controls">

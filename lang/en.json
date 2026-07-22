@@ -201,5 +201,6 @@
   "DX3rd.Notify.OnlyOneDieRemovable": "You can only remove up to 1 die.",
   "DX3rd.Notify.NoHealWhileBloodsucking": "HP cannot increase while Berserk: Bloodsucking.",
   "DX3rd.Notify.InvalidAttributeKey": "Attribute keys may not contain spaces or periods.",
-  "DX3rd.Notify.MacroNotFound": "Macro not found: {name}"
+  "DX3rd.Notify.MacroNotFound": "Macro not found: {name}",
+  "DX3rd.RoisBadgeHint": "Click to cycle: Rois → Titus → Sublimation → Rois"
 }

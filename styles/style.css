@@ -1808,3 +1808,59 @@
 .dx3rd .items-list .item .item-addon:has(.toggle-with-label) {
   flex: 0 0 auto;
 }
+
+/* ============================================================================
+   ロイスの状態バッジ (v2.2.0)
+
+   ロイス → タイタス → 昇華 → ロイス を1つのバッジで循環させる。
+   以前はボタンとチェックボックスが状態に応じて入れ替わり、押した時に何が
+   起きるか見た目から予測できなかった。状態と操作をこの1点へ集約する。
+
+   3状態を色で区別する。色だけに頼らずラベル文字も常に出しているので、
+   色覚に依存せず判別できる。
+   ============================================================================ */
+.dx3rd .items-list .item .rois-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 84px;
+  height: 24px;
+  padding: 0 10px;
+  margin: 0;
+  border: 1px solid #191813;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* 通常のロイス: 明るい地に暗い文字(未使用であることを示す) */
+.dx3rd .items-list .item .rois-badge[data-state="normal"] {
+  background: #f2ede1;
+  color: #191813;
+}
+
+/* タイタス化済み: 反転させて「消費した」ことを示す */
+.dx3rd .items-list .item .rois-badge[data-state="titus"] {
+  background: #191813;
+  color: #f2ede1;
+  border-color: #191813;
+}
+
+/* 昇華済み: 最終状態。クリムゾンで区切りを示す */
+.dx3rd .items-list .item .rois-badge[data-state="sublimation"] {
+  background: crimson;
+  color: #fff;
+  border-color: #7d0b22;
+}
+
+.dx3rd .items-list .item .rois-badge:hover {
+  filter: brightness(1.15);
+}
+
+/* タイタス行は黒帯になるため、バッジの枠が沈まないよう明るくする。 */
+.dx3rd .items-list .titus .rois-badge {
+  border-color: #f2ede1;
+}
