@@ -1698,3 +1698,71 @@
 .dx3rd input[type="checkbox"]:checked::before {
   color: #191813;
 }
+
+/* ============================================================================
+   チェックボックスの描画を自前で完結させる (v2.1.10)
+
+   Foundry v13 のチェックボックスは appearance:none + ::before で描かれ、
+   未選択時は ::before が position:static、選択時は absolute と挙動が変わる。
+   背景を白に上書きしても未選択の四角が黒く見える状態が解消しなかったため、
+   Foundry側の擬似要素を打ち消し、枠とチェックマークを自前で描く。
+   未選択 = 白地に濃い枠 / 選択済み = 濃い地に白いチェック。
+   ============================================================================ */
+.dx3rd input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 18px;
+  height: 18px;
+  margin: 0 2px;
+  padding: 0;
+  background: #fff;
+  border: 2px solid #191813;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+/* Foundry が描く既定のマーカーを無効化する */
+.dx3rd input[type="checkbox"]::before {
+  content: none;
+}
+
+.dx3rd input[type="checkbox"]:checked {
+  background: #191813;
+}
+
+/* チェックマークは擬似要素で自前描画(フォント依存を避ける) */
+.dx3rd input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0;
+  width: 4px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.dx3rd input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ============================================================================
+   タイタス化した行の文字色
+
+   .titus は「タイタス化(使い切り)」を示す既存の意匠で、黒地+クリムゾン文字。
+   v2.1.9 で .item-label / .item-name / .item-addon を暗色へ揃えた際、
+   詳細度の高いこちらが .titus の color を上書きしてしまい、黒地に暗い文字で
+   読めなくなっていた。タイタス行の中だけは明色へ戻す。
+   ============================================================================ */
+.dx3rd .items-list .titus .item-label,
+.dx3rd .items-list .titus .item-name,
+.dx3rd .items-list .titus .item-addon,
+.dx3rd .items-list .titus .item-detail,
+.dx3rd .items-list .titus .item-description {
+  color: crimson;
+}
