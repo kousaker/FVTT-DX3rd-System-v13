@@ -1784,3 +1784,27 @@
 .dx3rd .items-list .item .item-controls .item-control {
   padding: 0 3px;
 }
+
+/* --- タイタス/昇華のチェックボックスに常時ラベルを添える ---
+   □ が2つ並ぶだけでは何のチェックか分からないため、テキストを併記する。
+   ラベル全体がクリック領域になる(ハンドラは input 側に付いており、
+   label 経由でも1回だけ発火する)。 */
+.dx3rd .items-list .item .toggle-with-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: normal;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.dx3rd .items-list .item .toggle-with-label span {
+  line-height: 1;
+}
+
+/* ラベルを入れた分、右側の領域が名前欄を圧迫しないようにする。 */
+.dx3rd .items-list .item .item-addon:has(.toggle-with-label) {
+  flex: 0 0 auto;
+}
