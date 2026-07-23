@@ -1,0 +1,30 @@
+# Secrets and credentials (never commit)
+.env
+.env.*
+!.env.example
+!.env.template
+*.key
+*.pem
+*.pfx
+*.kdbx
+secrets/
+
+# Node / build output
+node_modules/
+dist/
+build/
+
+# Editor and OS metadata
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Transient files
+*.tmp
+*.bak
+*.old
+
+# NOTE: Foundry compendium packs use LevelDB files (*.db, *.ldb, *.log,
+# MANIFEST-*, CURRENT). Those are intentionally tracked under packs/ and are
+# not ignored here.
